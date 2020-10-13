@@ -109,8 +109,8 @@ nn_function <- function(measureFrom,measureTo,k) {
 
 
 #STUDY AREA
-#miamiBound <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Municipal_Boundary.geojson") %>%
-miamiBound <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Municipal_Boundary.geojson") %>%
+miamiBound <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Municipal_Boundary.geojson") %>%
+#miamiBound <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Municipal_Boundary.geojson") %>%
   filter(NAME == "MIAMI BEACH" | NAME == "MIAMI") %>%
   st_union() %>%
   st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326, agr = "constant") %>%
@@ -119,16 +119,16 @@ miamiBound <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\
 
 
 #STUDY AREA OSM (not projected so that it works)
-#miamiBoundOSM <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Municipal_Boundary.geojson") %>%
-miamiBoundOSM <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Municipal_Boundary.geojson") %>%
+miamiBoundOSM <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Municipal_Boundary.geojson") %>%
+#miamiBoundOSM <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Municipal_Boundary.geojson") %>%
   filter(NAME == "MIAMI BEACH" | NAME == "MIAMI") %>%
   st_union()
 
 
 
 #HOUSE DATA
-#houses <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/studentsData.geojson") %>%
-houses <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/studentsData.geojson") %>%
+houses <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/studentsData.geojson") %>%
+#houses <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/studentsData.geojson") %>%
   st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658') %>%
   st_centroid()
@@ -137,8 +137,8 @@ houses <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Dat
 
 
 #HOUSE DATA OSM (Not projected)
-#housesOSM <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/studentsData.geojson")
-housesOSM <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/studentsData.geojson")
+housesOSM <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/studentsData.geojson")
+#housesOSM <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/studentsData.geojson")
 
 
 
@@ -261,7 +261,7 @@ houses <-
 
 
 #PARKS
-#can't find Municipal_Park_Boundary.geojson, is it Municipal_Boundary.geojson?
+#BC can't find Municipal_Park_Boundary.geojson, is it Municipal_Boundary.geojson?
 #muniParks <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Municipal_Park_Boundary.geojson") %>%
 muniParks <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Municipal_Park_Boundary.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
@@ -279,8 +279,8 @@ parks <- bind_rows(muniParks, countyParks) %>%
 
 
 #SCHOOL DISTRICT
-#schoolDist <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/School_Board_District.geojson") %>%
-schoolDist <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/School_Board_District.geojson") %>%
+schoolDist <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/School_Board_District.geojson") %>%
+#schoolDist <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/School_Board_District.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658') %>%
   dplyr::select(ID)
@@ -289,8 +289,8 @@ schoolDist <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\
 
 #PUBLIC SCHOOL CATCHMENT/ATTENDANCE ZONES
 #elementary
-#elementary <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Elementary_School_Attendance_Boundary.geojson") %>%
-elementary <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Elementary_School_Attendance_Boundary.geojson") %>%
+elementary <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Elementary_School_Attendance_Boundary.geojson") %>%
+#elementary <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Elementary_School_Attendance_Boundary.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658') 
 elementary <- rbind(
@@ -307,8 +307,8 @@ elementary <- rbind(
   filter(inMiami == "YES") %>%
   dplyr::select(NAME)
 #middle
-#middle <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Middle_School_Attendance_Boundary.geojson") %>%
-middle <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Middle_School_Attendance_Boundary.geojson") %>%
+middle <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Middle_School_Attendance_Boundary.geojson") %>%
+#middle <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Middle_School_Attendance_Boundary.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658')
 middle <- rbind(
@@ -325,8 +325,8 @@ middle <- rbind(
   filter(inMiami == "YES") %>%
   dplyr::select(NAME)
 #high
-#high <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/High_School_Attendance_Boundary.geojson") %>%
-high <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/High_School_Attendance_Boundary.geojson") %>%
+high <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/High_School_Attendance_Boundary.geojson") %>%
+#high <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/High_School_Attendance_Boundary.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658')
 high <- rbind(
@@ -351,8 +351,8 @@ high <- rbind(
 
 #PUBLIC TRANSPORTATION
 #bus
-#bus <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Bus_Stop.geojson") %>%
-bus <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Bus_Stop.geojson") %>%
+bus <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Bus_Stop.geojson") %>%
+#bus <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Bus_Stop.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant")  %>%
   st_transform('ESRI:102658')
 bus <- rbind(
@@ -368,8 +368,8 @@ bus <- rbind(
     mutate(inMiami = "NO")) %>%
   filter(inMiami == "YES")
 #metro mover
-#metromover <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Metromover_Station.geojson") %>%
-metromover <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Metromover_Station.geojson") %>%
+metromover <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Metromover_Station.geojson") %>%
+#metromover <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Metromover_Station.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658') 
 metromover <- rbind(
@@ -385,8 +385,8 @@ metromover <- rbind(
     mutate(inMiami = "NO")) %>%
   filter(inMiami == "YES")
 #metro rail
-#metrorail <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Metrorail_Station.geojson") %>%
-metrorail <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Metrorail_Station.geojson") %>%
+metrorail <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Metrorail_Station.geojson") %>%
+#metrorail <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Metrorail_Station.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658') 
 metrorail <- rbind(
@@ -405,8 +405,8 @@ metrorail <- rbind(
 
 
 #CULTURE SPOTS
-#culture <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Culture_Venue.geojson") %>%
-culture <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Culture_Venue.geojson") %>%
+culture <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Culture_Venue.geojson") %>%
+#culture <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Culture_Venue.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658') %>%
   filter(CITY == "Miami" | CITY == "Miami Beach")
@@ -415,8 +415,8 @@ culture <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Da
 
 #COMMERCIAL PROPERTIES
 #read, project
-#commercial <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Commercial_Property.geojson") %>%
-commercial <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Commercial_Property.geojson") %>%
+commercial <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Commercial_Property.geojson") %>%
+#commercial <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Commercial_Property.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658') 
 #filter
@@ -436,6 +436,7 @@ commercial <- rbind(
 
 
 #FLOOD RISK ZONES
+#BC: CANNOT LOAD
 #read, project
 #flood <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/FEMA\ FLOOD\ ZONE") %>%
 #flood <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/FEMA\ FLOOD\ ZONE") %>%
@@ -461,8 +462,8 @@ commercial <- rbind(
  
  
 #CONTAMINATED SITES
-#contaminated <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Multi-Property_Contaminated_Site.geojson") %>%
- contaminated <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Multi-Property_Contaminated_Site.geojson") %>%
+contaminated <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Multi-Property_Contaminated_Site.geojson") %>%
+#contaminated <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Multi-Property_Contaminated_Site.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658')
  contaminated <-
@@ -480,16 +481,23 @@ commercial <- rbind(
   filter(inMiami == "YES")
 
 #payment/income
-employee_pay <- st_read("https://opendata.arcgis.com/datasets/4b372d5fa4884947a20d03464b292219_0.geojson")
+#employee_pay <- st_read("https://opendata.arcgis.com/datasets/4b372d5fa4884947a20d03464b292219_0.geojson") %>%
+#    st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
+#    st_transform('ESRI:102658')
 #i put monthly housing cost and household income in acs data
+#rm(employee_pay)
+
 
 #low income depressed area (county level no need to clip)
-low_income_depressed <- st_read("https://opendata.arcgis.com/datasets/40119bfc50274c1da548ec8022e9a7a9_0.geojson")
+low_income_depressed <- st_read("https://opendata.arcgis.com/datasets/40119bfc50274c1da548ec8022e9a7a9_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658')
-neighborhood_revitalization <- st_read("https://opendata.arcgis.com/datasets/fe6f419e21264158b18eb77be9870d97_0.geojson")
+
+neighborhood_revitalization <- st_read("https://opendata.arcgis.com/datasets/fe6f419e21264158b18eb77be9870d97_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658')
+  
+  
 #neighborhood stability https://gis-mdc.opendata.arcgis.com/datasets/neighborhood-stabilization-program/data
 nbh_stability <- st_read("https://opendata.arcgis.com/datasets/5c0822e7c26d437dbc04103ddf05d2fc_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
@@ -507,7 +515,10 @@ nbh_sta <- ms_clip(
   sys = FALSE
 )
 
-rm(nbh_stability)
+#redevelopment area
+rede <- st_read("https://opendata.arcgis.com/datasets/38d923b6509547f8bde102e621100b53_0.geojson") %>%
+  st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
+  st_transform('ESRI:102658')
 
 #1shop 
 shop_m <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/shop_point.geojson") %>%
@@ -524,8 +535,7 @@ nece_shop <- shop %>% filter(shop %in% c("convenience", "supermarket", "departme
 poor_shop <- shop %>% filter(shop %in% c("variety_store", "charity", "second_hand"))
 n_nece_shop <- setdiff(shop, rbind(nece_shop, poor_shop))
 n_nece_shop <- n_nece_shop[!(n_nece_shop$shop == "" | is.na(n_nece_shop$shop) | n_nece_shop$shop == "vacant"), ]
-#5do regreesion for my variables
-#6contaminated
+
 ```
 
 
@@ -562,7 +572,6 @@ n_nece_shop <- n_nece_shop[!(n_nece_shop$shop == "" | is.na(n_nece_shop$shop) | 
  
  
 #NEAREST NEIGHBOR (some are used for testing, to determine feature buffer distances)
-#BC: why can't we use this for contaminated sites but use buffer instead?
  st_c <- st_coordinates
  houses <-
    houses %>% 
@@ -571,12 +580,12 @@ n_nece_shop <- n_nece_shop[!(n_nece_shop$shop == "" | is.na(n_nece_shop$shop) | 
      contaminatedNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(contaminated)), 2),
      #commercial properties NN
      commNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(commercial)), 2),
-     #parks
-     parkNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 1),
-     parkNN2 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 2),
-     parkNN3 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 3),
-     parkNN4 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 4),
-     parkNN5 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 5),
+     #parks (I STILL CANT LOAD PARK DATA :(
+     #parkNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 1),
+     #parkNN2 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 2),
+     #parkNN3 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 3),
+     #parkNN4 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 4),
+     #parkNN5 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 5),
      #metro mover stations
      metroMNN5 = nn_function(st_c(st_centroid(houses)), st_c(metromover), 5),
      #metro rail stations
@@ -584,15 +593,17 @@ n_nece_shop <- n_nece_shop[!(n_nece_shop$shop == "" | is.na(n_nece_shop$shop) | 
      #bus stations
      busNN1 = nn_function(st_c(st_centroid(houses)), st_c(bus), 1),
      #culture
-     cultureNN1 = nn_function(st_c(st_centroid(houses)), st_c(bus), 1),
+     cultureNN1 = nn_function(st_c(st_centroid(houses)), st_c(culture), 1),
      #food/drinks
      foodBevNN1 = nn_function(st_c(st_centroid(houses)), st_c(foodBev), 1),
-     #daily food shopping place
+     #daily food shopping place 5250.894
      neceshopNN3 = nn_function(st_c(st_centroid(houses)), st_c(nece_shop), 3),
-     #poor people shopping place
+     #poor people shopping place 8617.399
      poorshopNN1 = nn_function(st_c(st_centroid(houses)), st_c(poor_shop), 1),
-     #leisure shopping place
-     nneceshopNN3 = nn_function(st_c(st_centroid(houses)), st_c(n_nece_shop), 3)
+     #leisure shopping place 4102.703
+     nneceshopNN3 = nn_function(st_c(st_centroid(houses)), st_c(n_nece_shop), 3),
+     #redevelopment 
+     redeNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(rede)), 3)
      ) 
 
 #not sure if we need buffer for shops
@@ -779,16 +790,18 @@ houses <- houses %>%
  houses <-
   houses %>%
   mutate(Mailing.Zip = as.numeric(Mailing.Zip))
- 
+
+#BC i don't have park data
  houses <- houses %>%
       mutate(parkArea = ifelse(is.na(parkArea), 0, parkArea))
    
  
  
 #payment/income
-employee_pay 
+
 #i put monthly housing cost and household income in acs data, BUT NOT SURE HOW TO DEAL WITH THAT.
 #AD - I dont htink we need employee_pay or low income depressed area because we already have income information by tract from ACS - at this stage in the project I think we need to focus on finalizing what we already have processed
+#BC: OKAY
 
 ####low income depressed area##### 
 depressedBuffer <- st_buffer(houses, 0.5*5280) %>%
@@ -803,13 +816,19 @@ houses <-
   left_join(houses, buffereddepressed)
 
 ##since depressed area has a wired shape, maybe we can do this too?
- houses$depressed <- houses %>% 
-   st_centroid() %>% 
-   st_join(low_income_depressed) %>% 
-   mutate(depressed = ifelse(is.na(depressed), 0, 1)) %>%
-   pull(depressed)
+# houses$depressed <- houses %>% 
+ #  st_join(depressedBuffer) %>% 
+ #  mutate(depressed = ifelse(is.na(depressed), 0, 1)) %>%
+ #  pull(depressed)
  
-#we can change the buffer for both, not decided yet
+#  houses$TOD <- houses %>% 
+#   st_centroid() %>% 
+#   st_join(metroRBuffer) %>% 
+#   mutate(TOD = ifelse(is.na(TOD), 0, 1)) %>%
+ #  pull(TOD)
+ #we can change the buffer for both, not decided yet
+  
+#revitalization
 reviBuffer <- st_buffer(houses, 0.5*5280) %>%
   dplyr::select(Property.Address) %>%
   st_as_sf()
@@ -823,18 +842,59 @@ houses <-
 
 #neighborhood stability 
 
-nbh_sta 
-0.5*5280
-#try to create a function to add up some attributes in reachable places, filll in later when I figure out
+#BC: ??? NOT WORKING FOR NOW 
+sta_buffer <- st_buffer(houses, 0.5*5280) %>%
+  dplyr::select(Property.Address) %>%
+  st_as_sf()
+bufferedsta <- st_intersection(sta_buffer, nbh_stability) %>%
+  group_by(Property.Address) %>%
+  summarise() %>%
+  mutate(parkArea = units::drop_units(st_area(.))) %>%
+  st_drop_geometry()
 
+houses <-
+  left_join(houses, bufferedsta)
 
-#1shop (save a spot here because not sure if we need extra processing the data)
+#redevelopment 
 
-nece_shop  
-poor_shop 
-n_nece_shop 
+rede <- as.data.frame(rede)
+houses$rede <- ifelse(st_intersects(houses$geometry, rede$geometry), 1, 0)
 
- 
+#shop 
+
+#nece_shop buffer
+nece_shop <- nece_shop %>% 
+   mutate(counter = 1) %>%
+   dplyr::select(counter)
+houses$nece_shop_buffer <-
+   st_buffer(houses, 10*5280) %>%
+   aggregate(nece_shop, ., sum) %>% 
+   st_drop_geometry() %>% 
+   mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
+   pull(counter)
+
+#poor_shop buffer
+poor_shop <- poor_shop %>% 
+   mutate(counter = 1) %>%
+   dplyr::select(counter)
+houses$poor_shop_buffer <-
+   st_buffer(houses, 10*5280) %>%
+   aggregate(poor_shop, ., sum) %>% 
+   st_drop_geometry() %>% 
+   mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
+   pull(counter)
+
+#n_nece_shop buffer
+n_nece_shop <- n_nece_shop %>% 
+   mutate(counter = 1) %>%
+   dplyr::select(counter)
+houses$n_nece_shop_buffer <-
+   st_buffer(houses, 10*5280) %>%
+   aggregate(n_nece_shop, ., sum) %>% 
+   st_drop_geometry() %>% 
+   mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
+   pull(counter)
+
 ```
 
 
@@ -855,9 +915,15 @@ n_nece_shop
 #6senior vs long term senior
  ####trying to create a salepricesqft
   #corr matrix
-numericVars <- 
-  select_if(st_drop_geometry(houses), is.numeric) %>% na.omit()
 
+#BC: mine is not working now too :( I just found out from the figures of all the variables, there are some that are with a lot of NAs and some do not work. Therefore I am making a subset using only those variables that can work. BTW, WELCOME TO USE names(houses) to add other varibales to this list because I still can't load some of the variables as noted above
+
+sub_houses <- houses[,c('SalePrice','distWater','County.Senior','County.LongTermSenior','City.Senior','City.LongTermSenior','Land.Use','Zoning','Mailing.Zip','AdjustedSqFt','LotSize','Stories','Units','LivingSqFt','ActualSqFt','SPSqFt','TOD','contaminatedNN1','commNN1','metroMNN5','metroRNN1','busNN1','cultureNN1','foodBevNN1','neceshopNN3','nneceshopNN3','commercialProperties','foodEstablishments','metrorailStops','metromoverStops','busStops','elemCatch','middleCatch','highCatch','schoolDist','timeToWork','medHHInc','monthhousingcost','pctVacant','pctWhite','pctRenterOcc','age','Bed.cat','Bath.cat','Pool','Patio','Fence','Gazebo','Carport','Wall','Dock','nece_shop_buffer','poor_shop_buffer','n_nece_shop_buffer','redeNN1')]
+
+numericVars <- 
+  select_if(st_drop_geometry(sub_houses), is.numeric) %>% na.omit()
+
+#this is working now!!!
 ggcorrplot(
   round(cor(numericVars), 1), 
   p.mat = cor_pmat(numericVars),
@@ -871,7 +937,7 @@ ggcorrplot(
  #Land, Bldg, ActualSqFt(>livingsqft=adjustedsqft>Lotsize=bath), age, bed.cat > stories
 #AD: I don't think we can use land - isn't it land value, which is close to SalePrice?
 #AD:, timeToWork, medHHInc, monthhousingcost, pctVacant, pctWhite, pctRenterOcc, busStops, metrorailStops, cultureSpots, parkArea, commercialProperties, distWater, LivingSqFt, Bath, Bed, Mailing.Zip
- #cor test
+ #cor test (BC: not sure if er need to keep this)
 
  cor.test(houses$Mailing.Zip, houses$SalePrice, method = "pearson")
  cor.test(houses$ActualSqFt, houses$SalePrice, method = "pearson")
@@ -880,9 +946,10 @@ ggcorrplot(
  cor.test(houses$age, houses$SalePrice, method = "pearson")
  cor.test(houses$age, houses$SalePrice, method = "pearson")
 
- #reg1
+ #reg1 #BC: THESE TWO ARE NOT WORKING
+ #Error in `contrasts<-`(`*tmp*`, value = contr.funs[1 + isOF[nn]]) : contrasts can be applied only to factors with 2 or more levels
  reg1 <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>% 
-             dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath, LotSize, Stories, Zoning, Bldg, age, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, busStops, distWater, monthlyHousingCosts, tract, Pool, Dock, Patio))
+             dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath, LotSize, Stories, Zoning, Bldg, age, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, busStops, distWater, monthhousingcost, Pool, Dock, Patio))
  summary(reg1)
  
  #reg 2 - 0.68 adjusted R^2 
@@ -903,7 +970,8 @@ inTrain <- createDataPartition(
               p = .60, list = FALSE)
 miami.training <- houses[inTrain,] 
 miami.test <- houses[-inTrain,]  
- 
+
+#BC:NOT WORKING TOO 
 reg.training <- 
   lm(SalePrice ~ ., data = st_drop_geometry(miami.training) %>% 
                              dplyr::select(SalePrice, ActualSqFt, 
@@ -1129,15 +1197,361 @@ ggplot() +
 ```
 
 ```{r final figures}
+#i am about to add single regression here too
 #distance to water
+
+waterReg <- lm(SalePrice ~ distWater, data = houses)
+summary(waterReg)
+
 ggplot() +
   geom_sf(data = acs) +
   geom_sf(data = houses, aes(colour = distWater)) +
   mapTheme()
 
-#park area
+#park area #BC: MANY NAs
 ggplot() + 
   geom_sf(data = houses, aes(colour = q5(parkArea))) +
   scale_fill_manual(values = palette5) +
   mapTheme()
+
+#County.Senior
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(County.Senior))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#County.LongTermSenior
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(County.LongTermSenior))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#City.Senior
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(City.Senior))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#City.LongTermSenior
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(City.LongTermSenior))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#Land.Use
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(Land.Use))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#Zoning
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(Zoning))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+
+#Mailing.Zip
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(Mailing.Zip))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#AdjustedSqFt
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(AdjustedSqFt))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#LotSize
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(LotSize))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#Stories
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(Stories))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#Units
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(Units))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#LivingSqFt
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(LivingSqFt))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#ActualSqFt
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(ActualSqFt))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#SPSqFt
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(SPSqFt))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#TOD
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(TOD))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#contaminated #BC FOR SOME REASON NOT WORKING 
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(contaminated))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#contaminatedNN1
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(contaminatedNN1))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#commNN1
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(commNN1))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#metroMNN5
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(metroMNN5))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#metroRNN1
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(metroRNN1))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#busNN1
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(busNN1))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#cultureNN1
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(cultureNN1))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#foodBevNN1
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(foodBevNN1))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#neceshopNN3
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(neceshopNN3))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#nneceshopNN3
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(nneceshopNN3))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#commercialProperties
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(commercialProperties))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#foodEstablishments
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(foodEstablishments))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#cultureSpot #BC: FOR SOME REASON NOT WORKING
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(cultureSpot))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#metrorailStops
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(metrorailStops))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#metromoverStops
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(metromoverStops))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#busStops
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(busStops))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#elemCatch
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(elemCatch))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#middleCatch
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(middleCatch))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#highCatch
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(highCatch))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#schoolDist
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(schoolDist))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#timeToWork
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(timeToWork))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#medHHInc
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(medHHInc))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#monthhousingcost
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(monthhousingcost))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#pctVacant
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(pctVacant))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#pctWhite
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(pctWhite))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#pctRenterOcc
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(pctRenterOcc))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#age
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(age))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#Bed.cat
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(Bed.cat))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#Bath.cat
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(Bath.cat))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#Pool
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(Pool))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#Patio
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(Patio))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+
+#Fence
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(Fence))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#Gazebo
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(Gazebo))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#Carport
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(Carport))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#Wall
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(Wall))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#Dock
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(Dock))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#nece_shop_buffer
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(nece_shop_buffer))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#poor_shop_buffer
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(poor_shop_buffer))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#n_nece_shop_buffer
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(n_nece_shop_buffer))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#redeNN1
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(redeNN1))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#rede #BC:many NAs
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(rede))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+
+
 ```
