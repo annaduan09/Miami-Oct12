@@ -109,8 +109,8 @@ nn_function <- function(measureFrom,measureTo,k) {
 
 
 #STUDY AREA
-miamiBound <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Municipal_Boundary.geojson") %>%
-#miamiBound <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Municipal_Boundary.geojson") %>%
+#miamiBound <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Municipal_Boundary.geojson") %>%
+miamiBound <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Municipal_Boundary.geojson") %>%
   filter(NAME == "MIAMI BEACH" | NAME == "MIAMI") %>%
   st_union() %>%
   st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326, agr = "constant") %>%
@@ -119,16 +119,16 @@ miamiBound <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Munici
 
 
 #STUDY AREA OSM (not projected so that it works)
-miamiBoundOSM <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Municipal_Boundary.geojson") %>%
-#miamiBoundOSM <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Municipal_Boundary.geojson") %>%
+#miamiBoundOSM <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Municipal_Boundary.geojson") %>%
+miamiBoundOSM <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Municipal_Boundary.geojson") %>%
   filter(NAME == "MIAMI BEACH" | NAME == "MIAMI") %>%
   st_union()
 
 
 
 #HOUSE DATA
-houses <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/studentsData.geojson") %>%
-#houses <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/studentsData.geojson") %>%
+#houses <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/studentsData.geojson") %>%
+houses <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/studentsData.geojson") %>%
   st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658') %>%
   st_centroid()
@@ -137,8 +137,8 @@ houses <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/studentsDa
 
 
 #HOUSE DATA OSM (Not projected)
-housesOSM <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/studentsData.geojson")
-#housesOSM <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/studentsData.geojson")
+#housesOSM <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/studentsData.geojson")
+housesOSM <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/studentsData.geojson")
 
 
 
@@ -240,35 +240,15 @@ houses <-
   mutate(distWater = housesOSM$CoastDist,
          SPSqFt = ifelse(!is.na(ActualSqFt)&!is.na(SalePrice), SalePrice / ActualSqFt, 0))
 
-#green space
-#green <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/green.geojson") %>%
-#  st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
-#  st_transform('ESRI:102658')
-#green <- rbind(
-#    st_centroid(green)[miamiBound,] %>%
-#      st_drop_geometry() %>%
-#      left_join(green) %>%
-#      st_sf() %>%
-#      mutate(inMiami = "YES"),
-#    green[miamiBound, op = st_disjoint] %>%
-#      st_drop_geometry() %>%
-#      left_join(green) %>%
-#      st_sf() %>%
-#      mutate(inMiami = "NO")) %>%
-#  filter(inMiami == "YES") %>%
-#  mutate(counter = 1)
-
 
 
 #PARKS
-#BC can't find Municipal_Park_Boundary.geojson, is it Municipal_Boundary.geojson?
-#muniParks <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Municipal_Park_Boundary.geojson") %>%
-muniParks <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Municipal_Park_Boundary.geojson") %>%
+muniParks <- st_read("https://opendata.arcgis.com/datasets/16fe02a1defa45b28bf14a29fb5f0428_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658') %>%
   dplyr::select(NAME, ADDRESS, CITY, CLASS, Shape__Area)
-#countyParks <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/County_Park_Boundary.geojson") %>%
-countyParks <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/County_Park_Boundary.geojson") %>%
+
+countyParks <- st_read("https://opendata.arcgis.com/datasets/aca1e6ff0f634be282d50cc2d534a832_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658') %>%
     dplyr::select(NAME, ADDRESS, CITY, CLASS, Shape__Area)
@@ -279,8 +259,7 @@ parks <- bind_rows(muniParks, countyParks) %>%
 
 
 #SCHOOL DISTRICT
-schoolDist <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/School_Board_District.geojson") %>%
-#schoolDist <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/School_Board_District.geojson") %>%
+schoolDist <- st_read("https://opendata.arcgis.com/datasets/bc16a5ebcdcd4f3e83b55c5d697a0317_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658') %>%
   dplyr::select(ID)
@@ -289,8 +268,7 @@ schoolDist <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/School
 
 #PUBLIC SCHOOL CATCHMENT/ATTENDANCE ZONES
 #elementary
-elementary <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Elementary_School_Attendance_Boundary.geojson") %>%
-#elementary <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Elementary_School_Attendance_Boundary.geojson") %>%
+elementary <- st_read("https://opendata.arcgis.com/datasets/19f5d8dcd9714e6fbd9043ac7a50c6f6_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658') 
 elementary <- rbind(
@@ -307,8 +285,7 @@ elementary <- rbind(
   filter(inMiami == "YES") %>%
   dplyr::select(NAME)
 #middle
-middle <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Middle_School_Attendance_Boundary.geojson") %>%
-#middle <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Middle_School_Attendance_Boundary.geojson") %>%
+middle <- st_read("https://opendata.arcgis.com/datasets/dd2719ff6105463187197165a9c8dd5c_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658')
 middle <- rbind(
@@ -325,8 +302,7 @@ middle <- rbind(
   filter(inMiami == "YES") %>%
   dplyr::select(NAME)
 #high
-high <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/High_School_Attendance_Boundary.geojson") %>%
-#high <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/High_School_Attendance_Boundary.geojson") %>%
+high <- st_read("https://opendata.arcgis.com/datasets/9004dbf5f7f645d493bfb6b875a43dc1_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658')
 high <- rbind(
@@ -344,15 +320,12 @@ high <- rbind(
   dplyr::select(NAME)
 
 
-
 #crime?
-
 
 
 #PUBLIC TRANSPORTATION
 #bus
-bus <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Bus_Stop.geojson") %>%
-#bus <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Bus_Stop.geojson") %>%
+bus <- st_read("https://opendata.arcgis.com/datasets/021adadcf6854f59852ff4652ad90c11_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant")  %>%
   st_transform('ESRI:102658')
 bus <- rbind(
@@ -368,8 +341,7 @@ bus <- rbind(
     mutate(inMiami = "NO")) %>%
   filter(inMiami == "YES")
 #metro mover
-metromover <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Metromover_Station.geojson") %>%
-#metromover <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Metromover_Station.geojson") %>%
+metromover <- st_read("https://opendata.arcgis.com/datasets/aec76104165c4e879b9b0203fa436dab_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658') 
 metromover <- rbind(
@@ -385,8 +357,7 @@ metromover <- rbind(
     mutate(inMiami = "NO")) %>%
   filter(inMiami == "YES")
 #metro rail
-metrorail <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Metrorail_Station.geojson") %>%
-#metrorail <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Metrorail_Station.geojson") %>%
+metrorail <- st_read("https://opendata.arcgis.com/datasets/ee3e2c45427e4c85b751d8ad57dd7b16_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658') 
 metrorail <- rbind(
@@ -405,18 +376,27 @@ metrorail <- rbind(
 
 
 #CULTURE SPOTS
-culture <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Culture_Venue.geojson") %>%
-#culture <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Culture_Venue.geojson") %>%
+culture <- st_read("https://opendata.arcgis.com/datasets/70c48f0eb067448c8a787cfa1c1c3bb9_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
-  st_transform('ESRI:102658') %>%
-  filter(CITY == "Miami" | CITY == "Miami Beach")
+  st_transform('ESRI:102658') 
+culture <- rbind(
+  culture[miamiBound,] %>%
+    st_drop_geometry() %>%
+    left_join(culture) %>%
+    st_sf() %>%
+    mutate(inMiami = "YES"),
+  culture[miamiBound, op = st_disjoint] %>%
+    st_drop_geometry() %>%
+    left_join(culture) %>%
+    st_sf() %>%
+    mutate(inMiami = "NO")) %>%
+  filter(inMiami == "YES")
 
 
 
 #COMMERCIAL PROPERTIES
 #read, project
-commercial <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Commercial_Property.geojson") %>%
-#commercial <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Commercial_Property.geojson") %>%
+commercial <- st_read("https://opendata.arcgis.com/datasets/fb8303c577c24ea386a91be7329842be_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658') 
 #filter
@@ -437,33 +417,49 @@ commercial <- rbind(
 
 #FLOOD RISK ZONES
 #BC: CANNOT LOAD
-#read, project
-#flood <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/FEMA\ FLOOD\ ZONE") %>%
-#flood <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/FEMA\ FLOOD\ ZONE") %>%
-#  st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
-#  st_transform('ESRI:102658') 
+#AD: should work now - linked directly to source
+floodRisk <- st_read("https://opendata.arcgis.com/datasets/ef3bdd041b2e424695eb4dfe965966c4_0.geojson") %>%
+  st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
+  st_transform('ESRI:102658') 
 #filter
-# flood <-
-#   rbind(
-#  st_centroid(flood)[miamiBound,] %>%
-#    st_drop_geometry() %>%
-#    left_join(flood) %>%
-#    st_sf() %>%
-#    mutate(inMiami = "YES"),
-#  st_centroid(flood)[miamiBound, op = st_disjoint] %>%
-#    st_drop_geometry() %>%
-#    left_join(flood) %>%
-#    st_sf() %>%
-#    mutate(inMiami = "NO")) %>%
-#  filter(inMiami == "YES") %>%
-#   dplyr::select(-inMiami, -SHAPE_Length, -ELEV, -FID) %>%
-#   dplyr::rename(FloodZone = FZONE, FloodHazard = ZONESUBTY)
+ floodRisk <-
+   rbind(
+  st_centroid(floodRisk)[miamiBound,] %>%
+    st_drop_geometry() %>%
+    left_join(floodRisk) %>%
+    st_sf() %>%
+    mutate(inMiami = "YES"),
+  st_centroid(floodRisk)[miamiBound, op = st_disjoint] %>%
+    st_drop_geometry() %>%
+    left_join(floodRisk) %>%
+    st_sf() %>%
+    mutate(inMiami = "NO")) %>%
+  filter(inMiami == "YES") %>%
+   dplyr::select(-inMiami, -SHAPE_Length, -ELEV, -FID) %>%
+   dplyr::rename(FloodZone = FZONE, FloodHazard = ZONESUBTY)
  
+ 
+ floodInsure <- st_read("https://opendata.arcgis.com/datasets/f589473ddada46e78d437aaf09205b04_0.geojson") %>%
+  st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
+  st_transform('ESRI:102658') 
+filter
+ flood <-
+   rbind(
+  st_centroid(floodInsure)[miamiBound,] %>%
+    st_drop_geometry() %>%
+    left_join(floodInsure) %>%
+    st_sf() %>%
+    mutate(inMiami = "YES"),
+  st_centroid(floodInsure)[miamiBound, op = st_disjoint] %>%
+    st_drop_geometry() %>%
+    left_join(floodInsure) %>%
+    st_sf() %>%
+    mutate(inMiami = "NO")) %>%
+  filter(inMiami == "YES")
  
  
 #CONTAMINATED SITES
-contaminated <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Multi-Property_Contaminated_Site.geojson") %>%
-#contaminated <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Multi-Property_Contaminated_Site.geojson") %>%
+contaminated <- st_read("https://opendata.arcgis.com/datasets/43750f842b1e451aa0347a2ca34a61d7_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658')
  contaminated <-
@@ -900,6 +896,17 @@ houses$n_nece_shop_buffer <-
 
 ```{r correlation}
 
+houses %>% 
+  dplyr::select(SalePrice, Pool, Bed.cat, highCatch) %>%
+  filter(SalePrice <= 1000000) %>%
+  gather(Variable, Value, -SalePrice) %>% 
+   ggplot(aes(Value, SalePrice)) +
+     geom_bar(position = "dodge", stat = "summary", fun.y = "mean") +
+     facet_wrap(~Variable, ncol = 1, scales = "free") +
+     labs(title = "Price as a function of categorical variables", y = "Mean_Price") +
+     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+     plotTheme()
+
 
  #####housing correlation
 #1*bedrooms
@@ -972,6 +979,7 @@ miami.training <- houses[inTrain,]
 miami.test <- houses[-inTrain,]  
 
 #BC:NOT WORKING TOO 
+#AD: sorry - probably because of the park file (parkArea) - should work now! 
 reg.training <- 
   lm(SalePrice ~ ., data = st_drop_geometry(miami.training) %>% 
                              dplyr::select(SalePrice, ActualSqFt, 
