@@ -782,18 +782,54 @@ houses <- houses %>%
          Dock = ifelse(str_detect(XF1, "Dock") | str_detect(XF2, "Dock") | str_detect(XF3, "Dock"), "Dock", "No Dock"),
          )
 
-#ZIP CODE 
+#FIX NA VALUES
+#zip
  houses <-
   houses %>%
   mutate(Mailing.Zip = as.numeric(Mailing.Zip),
          Mailing.Zip = ifelse(is.na(Mailing.Zip), 0, Mailing.Zip))
 
-#BC i don't have park data
- # AD: should be good now
-# houses <- houses %>%
-#      mutate(parkArea = ifelse(is.na(parkArea), 0, parkArea))
-   
+#School dist
+ houses <-
+   houses %>%
+  mutate(elemCatch = ifelse(is.na(elemCatch), "other", elemCatch),
+         middleCatch = ifelse(is.na(middleCatch), "other", middleCatch),
+         highCatch = ifelse(is.na(highCatch), "other", highCatch),
+         ) 
  
+ #set of houses with missing ACS valeus - don't need anymore
+# houseNA <- subset(houses[c("441","579","580","581","1016","1372","1557","1853","2140","2557","2563","2571","2603","2786","2981","3050","3361"),])
+ 
+
+ 
+#park
+ houses <- houses %>%
+     mutate(parkArea = ifelse(is.na(parkArea), 0, parkArea))
+ 
+ #acs - here I found the location of NA values and gave these houses the ACS values of houses nearby/in same neighborhood
+ houses["3487", "NAME"] = houses["1099", "NAME"]
+ houses["3487","timeToWork"] =  houses["1099","timeToWork"]
+houses["3487", "medHHInc"] = houses["1099", "medHHInc"]
+houses["3487", "monthhousingcost"] = houses["1099", "monthhousingcost"]
+houses["3487", "pctVacant"] = houses["1099", "pctVacant"]
+houses["3487", "pctWhite"] = houses["1099", "pctWhite"]
+houses["3487", "pctRenterOcc"] = houses["1099", "pctRenterOcc"]
+
+
+houses[c("579","580","581","1016","1372","1557","1853","2140","2557","2563","2571","2603","2786","2981","3050","3361"), "NAME"] = houses["3458", "NAME"]
+houses[c("579","580","581","1016","1372","1557","1853","2140","2557","2563","2571","2603","2786","2981","3050","3361"), "timeToWork"] = houses["3458", "timeToWork"]
+houses[c("579","580","581","1016","1372","1557","1853","2140","2557","2563","2571","2603","2786","2981","3050","3361"), "medHHInc"] = houses["3458", "medHHInc"]
+houses[c("579","580","581","1016","1372","1557","1853","2140","2557","2563","2571","2603","2786","2981","3050","3361"), "monthhousingcost"] = houses["3458", "monthhousingcost"]
+houses[c("579","580","581","1016","1372","1557","1853","2140","2557","2563","2571","2603","2786","2981","3050","3361"), "pctVacant"] = houses["3458", "pctVacant"]
+houses[c("579","580","581","1016","1372","1557","1853","2140","2557","2563","2571","2603","2786","2981","3050","3361"), "pctWhite"] = houses["3458", "pctWhite"]
+houses[c("579","580","581","1016","1372","1557","1853","2140","2557","2563","2571","2603","2786","2981","3050","3361"), "pctRenterOcc"] = houses["3458", "pctRenterOcc"]
+
+houses["441", c("NAME","timeToWork","medHHInc","monthhousingcost","pctVacant","pctWhite","pctRenterOcc")] = houses["2090", c("NAME","timeToWork","medHHInc","monthhousingcost","pctVacant","pctWhite","pctRenterOcc")]
+
+ 
+
+
+
  
 #payment/income
 
@@ -898,8 +934,10 @@ houses$n_nece_shop_buffer <-
 ```{r correlation}
 
 houses %>% 
-  dplyr::select(SalePrice, elemCatch, TOD, Stories) %>%
-  mutate(Stories = as.factor(Stories)) %>%
+  dplyr::select(SalePrice, TOD, Stories, Pool) %>%
+  mutate(Stories = as.factor(Stories),
+         TOD = as.factor(TOD),
+         Pool = as.factor(Pool)) %>%
   filter(SalePrice <= 1000000) %>%
   gather(Variable, Value, -SalePrice) %>% 
    ggplot(aes(Value, SalePrice)) +
@@ -930,7 +968,7 @@ houses %>%
 sub_houses <- houses[,c('SalePrice','distWater','County.Senior','County.LongTermSenior','City.Senior','City.LongTermSenior','Land.Use','Zoning','Mailing.Zip','AdjustedSqFt','LotSize','Stories','Units','LivingSqFt','ActualSqFt','SPSqFt','TOD','contaminatedNN1','commNN1','metroMNN5','metroRNN1','busNN1','cultureNN1','foodBevNN1','neceshopNN3','nneceshopNN3','commercialProperties','foodEstablishments','metrorailStops','metromoverStops','busStops','elemCatch','middleCatch','highCatch','schoolDist','timeToWork','medHHInc','monthhousingcost','pctVacant','pctWhite','pctRenterOcc','age','Bed.cat','Bath.cat','Pool','Patio','Fence','Gazebo','Carport','Wall','Dock','nece_shop_buffer','poor_shop_buffer','n_nece_shop_buffer','redeNN1')]
 
 numericVars <- 
-  select_if(st_drop_geometry(sub_houses), is.numeric) %>% na.omit()
+  select_if(st_drop_geometry(houses), is.numeric) %>% na.omit()
 
 #this is working now!!!
 ggcorrplot(
@@ -1082,6 +1120,7 @@ nhoods_m <- subset(nhoods_fl, CITY == "MIAMI")%>%
 
 nhoods <- rbind(nhoods_mb, nhoods_m)
 
+ 
 #DATA ALREADY PARTITIONED IN EARLIER SECTION
 
 
