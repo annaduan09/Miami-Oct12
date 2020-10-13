@@ -443,7 +443,7 @@ floodRisk <- st_read("https://opendata.arcgis.com/datasets/ef3bdd041b2e424695eb4
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658') 
 filter
- flood <-
+ floodInsure <-
    rbind(
   st_centroid(floodInsure)[miamiBound,] %>%
     st_drop_geometry() %>%
@@ -455,7 +455,13 @@ filter
     left_join(floodInsure) %>%
     st_sf() %>%
     mutate(inMiami = "NO")) %>%
-  filter(inMiami == "YES")
+  filter(inMiami == "YES") %>%
+   mutate(floodInsureType = PANELID)
+ 
+ ggplot() + 
+   geom_sf(data = floodInsure, aes(colour = floodInsureType)) +
+   geom_sf(data = houses, aes(colour = q5(SalePrice))) +
+   mapTheme()
  
  
 #CONTAMINATED SITES
@@ -475,16 +481,11 @@ contaminated <- st_read("https://opendata.arcgis.com/datasets/43750f842b1e451aa0
     st_sf() %>%
     mutate(inMiami = "NO")) %>%
   filter(inMiami == "YES")
-
-#payment/income
-#employee_pay <- st_read("https://opendata.arcgis.com/datasets/4b372d5fa4884947a20d03464b292219_0.geojson") %>%
-#    st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
-#    st_transform('ESRI:102658')
-#i put monthly housing cost and household income in acs data
-#rm(employee_pay)
+ 
 
 
 #low income depressed area (county level no need to clip)
+ #AD: Are these within our study area? I don't see much overlap and I feel this would result in a lot of NAs
 low_income_depressed <- st_read("https://opendata.arcgis.com/datasets/40119bfc50274c1da548ec8022e9a7a9_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658')
@@ -492,7 +493,6 @@ low_income_depressed <- st_read("https://opendata.arcgis.com/datasets/40119bfc50
 neighborhood_revitalization <- st_read("https://opendata.arcgis.com/datasets/fe6f419e21264158b18eb77be9870d97_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658')
-  
   
 #neighborhood stability https://gis-mdc.opendata.arcgis.com/datasets/neighborhood-stabilization-program/data
 nbh_stability <- st_read("https://opendata.arcgis.com/datasets/5c0822e7c26d437dbc04103ddf05d2fc_0.geojson") %>%
@@ -502,7 +502,7 @@ nbh_stability <- st_read("https://opendata.arcgis.com/datasets/5c0822e7c26d437db
 install.packages("rmapshaper")
 library(rmapshaper)
 
-nbh_sta <- ms_clip(
+nbh_sta <- ms_clip(  #AD: what does this do?
   nbh_stability,
   clip = NULL,
   bbox = c(xmin, ymin, xmax, ymax),
@@ -512,7 +512,7 @@ nbh_sta <- ms_clip(
 )
 
 #redevelopment area
-rede <- st_read("https://opendata.arcgis.com/datasets/38d923b6509547f8bde102e621100b53_0.geojson") %>%
+redev <- st_read("https://opendata.arcgis.com/datasets/38d923b6509547f8bde102e621100b53_0.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658')
 
@@ -555,15 +555,15 @@ n_nece_shop <- n_nece_shop[!(n_nece_shop$shop == "" | is.na(n_nece_shop$shop) | 
  #CONTAMINATION BUFFER
  #BC https://www.ncceh.ca/sites/default/files/Cemetery_setback_distances_surface_water_contamination-Oct_2017.pdf
  #maybe we use use a buffer of 250m?
- contaminatedBuffer <- contaminated %>%
+ contamBuffer <- contaminated %>%
    st_buffer(250) %>%
    st_union() %>%
    st_as_sf() %>%
    mutate(contam = 1)
  houses$contaminated <- houses %>%
-   st_join(contaminatedBuffer) %>%
+   st_join(contamBuffer) %>%
    mutate(contam = ifelse(is.na(contam), 0, 1)) %>%
-   pull(contaminated)
+   pull(contam)
 
  
  
@@ -573,15 +573,15 @@ n_nece_shop <- n_nece_shop[!(n_nece_shop$shop == "" | is.na(n_nece_shop$shop) | 
    houses %>% 
    mutate(
      #contaminated
-     contaminatedNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(contaminated)), 2),
+      contamNN1 = nn_function(st_c(st_centroid(houses)), st_c(contaminated), 1),
+     contamNN2 = nn_function(st_c(st_centroid(houses)), st_c(contaminated), 2),
+     contamNN3 = nn_function(st_c(st_centroid(houses)), st_c(contaminated), 3),
+     contamNN4 = nn_function(st_c(st_centroid(houses)), st_c(contaminated), 4),
+     contamNN5 = nn_function(st_c(st_centroid(houses)), st_c(contaminated), 5),
      #commercial properties NN
      commNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(commercial)), 2),
      #parks (I STILL CANT LOAD PARK DATA :(
-     #parkNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 1),
-     #parkNN2 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 2),
-     #parkNN3 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 3),
-     #parkNN4 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 4),
-     #parkNN5 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 5),
+            #AD: should work now
      #metro mover stations
      metroMNN5 = nn_function(st_c(st_centroid(houses)), st_c(metromover), 5),
      #metro rail stations
@@ -593,13 +593,13 @@ n_nece_shop <- n_nece_shop[!(n_nece_shop$shop == "" | is.na(n_nece_shop$shop) | 
      #food/drinks
      foodBevNN1 = nn_function(st_c(st_centroid(houses)), st_c(foodBev), 1),
      #daily food shopping place 5250.894
-     neceshopNN3 = nn_function(st_c(st_centroid(houses)), st_c(nece_shop), 3),
+ #    neceshopNN3 = nn_function(st_c(st_centroid(houses)), st_c(nece_shop), 3),
      #poor people shopping place 8617.399
-     poorshopNN1 = nn_function(st_c(st_centroid(houses)), st_c(poor_shop), 1),
+  #   poorshopNN1 = nn_function(st_c(st_centroid(houses)), st_c(poor_shop), 1),
      #leisure shopping place 4102.703
-     nneceshopNN3 = nn_function(st_c(st_centroid(houses)), st_c(n_nece_shop), 3),
+ #    nneceshopNN3 = nn_function(st_c(st_centroid(houses)), st_c(n_nece_shop), 3),
      #redevelopment 
-     redeNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(rede)), 3)
+#     redeNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(redev)), 3)
      ) 
 
 #not sure if we need buffer for shops
@@ -785,11 +785,13 @@ houses <- houses %>%
 #ZIP CODE 
  houses <-
   houses %>%
-  mutate(Mailing.Zip = as.numeric(Mailing.Zip))
+  mutate(Mailing.Zip = as.numeric(Mailing.Zip),
+         Mailing.Zip = ifelse(is.na(Mailing.Zip), 0, Mailing.Zip))
 
 #BC i don't have park data
- houses <- houses %>%
-      mutate(parkArea = ifelse(is.na(parkArea), 0, parkArea))
+ # AD: should be good now
+# houses <- houses %>%
+#      mutate(parkArea = ifelse(is.na(parkArea), 0, parkArea))
    
  
  
@@ -806,7 +808,6 @@ depressedBuffer <- st_buffer(houses, 0.5*5280) %>%
 buffereddepressed <- st_intersection(depressedBuffer, low_income_depressed) %>%
   group_by(Property.Address) %>%
   summarise() %>%
-  mutate(parkArea = units::drop_units(st_area(.))) %>%
   st_drop_geometry()
 houses <-
   left_join(houses, buffereddepressed)
@@ -897,7 +898,8 @@ houses$n_nece_shop_buffer <-
 ```{r correlation}
 
 houses %>% 
-  dplyr::select(SalePrice, Pool, Bed.cat, highCatch) %>%
+  dplyr::select(SalePrice, elemCatch, TOD, Stories) %>%
+  mutate(Stories = as.factor(Stories)) %>%
   filter(SalePrice <= 1000000) %>%
   gather(Variable, Value, -SalePrice) %>% 
    ggplot(aes(Value, SalePrice)) +
