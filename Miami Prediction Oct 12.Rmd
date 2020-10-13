@@ -133,9 +133,7 @@ houses <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Dat
   st_transform('ESRI:102658') %>%
   st_centroid()
 
-ggplot() +
-  geom_sf(data = houses, aes(colour = Mailing.Zip)) +
-  mapTheme()
+
 
 
 #HOUSE DATA OSM (Not projected)
