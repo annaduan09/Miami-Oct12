@@ -458,10 +458,6 @@ filter
   filter(inMiami == "YES") %>%
    mutate(floodInsureType = PANELID)
  
- ggplot() + 
-   geom_sf(data = floodInsure, aes(colour = floodInsureType)) +
-   geom_sf(data = houses, aes(colour = q5(SalePrice))) +
-   mapTheme()
  
  
 #CONTAMINATED SITES
@@ -516,7 +512,7 @@ redev <- st_read("https://opendata.arcgis.com/datasets/38d923b6509547f8bde102e62
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658')
 
-#1shop 
+#1shop #AD: WHere are these files?
 shop_m <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/shop_point.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658')
@@ -739,7 +735,15 @@ houses <-
    rename(schoolDist = ID)
  
  
- 
+ #FLOOD INSURANCE CATEGORIES
+floodInsure <- floodInsure %>%
+  dplyr::select(floodInsureType)
+houses <- houses %>%
+  st_join(., floodInsure) %>%
+  mutate(floodInsureType = ifelse(is.na(floodInsureType), "other", floodInsureType))
+
+
+
 #ADD ACS DATA
 houses <- 
   st_join(houses, acs) 
@@ -771,6 +775,36 @@ houses <-
                   Bath >= 3                    ~ "3+ Bathrooms"))
  
  
+ houses <- 
+  houses %>%
+  mutate(Stories.cat = case_when(
+                  Stories < 2  ~ "Up to 1 Stories",
+                  Stories == 2  ~ "2 Stories",
+                  Stories >= 3                    ~ "3+ Stories"))
+ 
+ 
+  
+ houses <- 
+  houses %>%
+  mutate(distWater.cat = case_when(
+                  distWater < 0.2  ~ "Less than 1/5 Mile",
+                  distWater >= 0.2 & distWater < 1.05  ~ "1/5 - 1 Miles",
+                  distWater >= 1.05 & distWater < 1.5  ~ "1 - 1.5 Miles",
+                  distWater >= 1.5                    ~ "1.5+ Miles"))
+ 
+  houses <- 
+  houses %>%
+  mutate(TOD.cat = case_when(
+                  TOD == 1  ~ "TOD",
+                  TOD == 0  ~ "Non TOD"))
+  
+houses <- 
+  houses %>%
+  mutate(contaminated.cat = case_when(
+                  contaminated == 1  ~ "Contam Zone",
+                  contaminated == 0  ~ "Non Contam"))
+ 
+ 
  #OTHER HOUSE FEATURES
 houses <- houses %>% 
   mutate(Pool = ifelse(str_detect(XF1, "Pool") | str_detect(XF2, "Pool") | str_detect(XF3, "Pool") | str_detect(XF1, "Whirlpool") | str_detect(XF2, "Whirlpool") | str_detect(XF3, "Whirlpool") | str_detect(XF1, "Jacuzzi") | str_detect(XF2, "Jacuzzi") | str_detect(XF3, "Jacuzzi"), "Pool", "No Pool"),
@@ -797,7 +831,7 @@ houses <- houses %>%
          highCatch = ifelse(is.na(highCatch), "other", highCatch),
          ) 
  
- #set of houses with missing ACS valeus - don't need anymore
+ #set of houses with missing ACS values - don't need this anymore
 # houseNA <- subset(houses[c("441","579","580","581","1016","1372","1557","1853","2140","2557","2563","2571","2603","2786","2981","3050","3361"),])
  
 
@@ -825,9 +859,9 @@ houses[c("579","580","581","1016","1372","1557","1853","2140","2557","2563","257
 houses[c("579","580","581","1016","1372","1557","1853","2140","2557","2563","2571","2603","2786","2981","3050","3361"), "pctRenterOcc"] = houses["3458", "pctRenterOcc"]
 
 houses["441", c("NAME","timeToWork","medHHInc","monthhousingcost","pctVacant","pctWhite","pctRenterOcc")] = houses["2090", c("NAME","timeToWork","medHHInc","monthhousingcost","pctVacant","pctWhite","pctRenterOcc")]
-
  
-
+houses %>%
+  dplyr::select(-Property.Zip)
 
 
  
@@ -963,6 +997,8 @@ houses %>%
  ####trying to create a salepricesqft
   #corr matrix
 
+#AD: CORRPLOT WORKS WITH FULL HOUSES LAYER NOW! :D
+
 #BC: mine is not working now too :( I just found out from the figures of all the variables, there are some that are with a lot of NAs and some do not work. Therefore I am making a subset using only those variables that can work. BTW, WELCOME TO USE names(houses) to add other varibales to this list because I still can't load some of the variables as noted above
 
 sub_houses <- houses[,c('SalePrice','distWater','County.Senior','County.LongTermSenior','City.Senior','City.LongTermSenior','Land.Use','Zoning','Mailing.Zip','AdjustedSqFt','LotSize','Stories','Units','LivingSqFt','ActualSqFt','SPSqFt','TOD','contaminatedNN1','commNN1','metroMNN5','metroRNN1','busNN1','cultureNN1','foodBevNN1','neceshopNN3','nneceshopNN3','commercialProperties','foodEstablishments','metrorailStops','metromoverStops','busStops','elemCatch','middleCatch','highCatch','schoolDist','timeToWork','medHHInc','monthhousingcost','pctVacant','pctWhite','pctRenterOcc','age','Bed.cat','Bath.cat','Pool','Patio','Fence','Gazebo','Carport','Wall','Dock','nece_shop_buffer','poor_shop_buffer','n_nece_shop_buffer','redeNN1')]
@@ -970,7 +1006,7 @@ sub_houses <- houses[,c('SalePrice','distWater','County.Senior','County.LongTerm
 numericVars <- 
   select_if(st_drop_geometry(houses), is.numeric) %>% na.omit()
 
-#this is working now!!!
+
 ggcorrplot(
   round(cor(numericVars), 1), 
   p.mat = cor_pmat(numericVars),
@@ -986,7 +1022,7 @@ ggcorrplot(
 #AD:, timeToWork, medHHInc, monthhousingcost, pctVacant, pctWhite, pctRenterOcc, busStops, metrorailStops, cultureSpots, parkArea, commercialProperties, distWater, LivingSqFt, Bath, Bed, Mailing.Zip
  #cor test (BC: not sure if er need to keep this)
 
- cor.test(houses$Mailing.Zip, houses$SalePrice, method = "pearson")
+ cor.test(houses$floodInsureType, houses$SalePrice, method = "pearson")
  cor.test(houses$ActualSqFt, houses$SalePrice, method = "pearson")
  cor.test(houses$Bed.cat, houses$SalePrice, method = "pearson") #NOT NUMERIC NOT WORKING
  cor.test(houses$age, houses$SalePrice, method = "pearson")
@@ -994,18 +1030,25 @@ ggcorrplot(
  cor.test(houses$age, houses$SalePrice, method = "pearson")
 
  #reg1 #BC: THESE TWO ARE NOT WORKING
- #Error in `contrasts<-`(`*tmp*`, value = contr.funs[1 + isOF[nn]]) : contrasts can be applied only to factors with 2 or more levels
+ #AD: should work now!
+ 
+ #1: random ish
  reg1 <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>% 
-             dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath, LotSize, Stories, Zoning, Bldg, age, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, busStops, distWater, monthhousingcost, Pool, Dock, Patio))
+             dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath, LotSize, Stories, Zoning, Bldg, age, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, monthhousingcost, Pool, Dock, Patio))
  summary(reg1)
  
- #reg 2 - 0.68 adjusted R^2 
+ #reg 2 - 0.61 adjusted R^2 
 reg2 <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>% 
              dplyr::select(SalePrice, ActualSqFt, Bath.cat, Bed.cat,
              medHHInc, monthhousingcost, pctVacant, pctWhite, pctRenterOcc, parkArea, commercialProperties, distWater, Mailing.Zip, Dock, Patio, age, cultureSpots))
  summary(reg2)
  
- 
+ #reg 3: descending order of correlations - 0.72 adjusted R^2
+ #AD: flood insure type is great!
+ reg3 <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>% 
+             dplyr::select(SalePrice, ActualSqFt, Zoning, Stories.cat, elemCatch, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, pctVacant, pctRenterOcc, monthhousingcost, Patio, Wall, foodEstablishments, metromoverStops, metrorailStops, parkArea, TOD, floodInsureType, schoolDist, ))
+ summary(reg3)
+
  
 ```
 
