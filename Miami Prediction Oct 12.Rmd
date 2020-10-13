@@ -321,7 +321,7 @@ middle <- rbind(
   dplyr::select(NAME)
 #high
 #high <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/High_School_Attendance_Boundary.geojson") %>%
-high <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/MHigh_School_Attendance_Boundary.geojson") %>%
+high <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/High_School_Attendance_Boundary.geojson") %>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658')
 high <- rbind(
@@ -568,6 +568,10 @@ n_nece_shop <- n_nece_shop[!(n_nece_shop$shop == "" | is.na(n_nece_shop$shop) | 
      commNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(commercial)), 2),
      #parks
      parkNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 1),
+     parkNN2 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 2),
+     parkNN3 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 3),
+     parkNN4 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 4),
+     parkNN5 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 5),
      #metro mover stations
      metroMNN5 = nn_function(st_c(st_centroid(houses)), st_c(metromover), 5),
      #metro rail stations
@@ -598,6 +602,7 @@ houses$commercialProperties <-
    st_buffer(houses, 846) %>%
    aggregate(commercial, ., sum) %>% 
    st_drop_geometry() %>% 
+  mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
    pull(counter)
  
 
@@ -611,6 +616,7 @@ houses$foodEstablishments <-
    st_buffer(houses, 2774) %>%
    aggregate(foodBev, ., sum) %>% 
    st_drop_geometry() %>% 
+    mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
    pull(counter)
 
 
@@ -624,6 +630,7 @@ houses$cultureSpots <-
    st_buffer(houses, 774) %>%
    aggregate(culture, ., sum) %>% 
    st_drop_geometry() %>% 
+   mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
    pull(counter)
 
 
@@ -638,6 +645,7 @@ houses$metrorailStops <-
    st_buffer(houses, 12076.7) %>%
    aggregate(metrorail, ., sum) %>% 
    st_drop_geometry() %>% 
+  mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
    pull(counter)
 
 
@@ -651,6 +659,7 @@ houses$metromoverStops <-
    st_buffer(houses, 18845) %>%
    aggregate(metromover, ., sum) %>% 
    st_drop_geometry() %>% 
+   mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
    pull(counter)
 
 
@@ -664,6 +673,7 @@ houses$busStops <-
    st_buffer(houses, 775) %>%
    aggregate(bus, ., sum) %>% 
    st_drop_geometry() %>% 
+  mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
    pull(counter)
  
 
@@ -678,6 +688,7 @@ houses$parkCount <-
    st_buffer(houses, 1600) %>%
    aggregate(parkCentroids, ., sum) %>% 
    st_drop_geometry() %>% 
+   mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
    pull(counter)
 #make buffer for each house
 parkBuffer <- st_buffer(houses, 1600) %>%
@@ -691,7 +702,7 @@ bufferedParks <- st_intersection(parkBuffer, parks) %>%
   st_drop_geometry()
 #add park area back to houses file
 houses <-
-  left_join(houses, bufferedParks)
+  left_join(houses, bufferedParks) 
 
 
 
@@ -718,14 +729,14 @@ houses <-
  
  
 #ADD ACS DATA
- houses <- 
-   st_join(houses, acs) %>%
+houses <- 
+  st_join(houses, acs) 
  
  
  
  
  #HOUSE AGE
- houses <-
+houses <-
    houses %>%
    mutate(age = ifelse(is.na(YearBuilt), 0, (2020 - YearBuilt)))
  
@@ -739,16 +750,14 @@ houses <-
                   Bed >= 3 & Bed < 4  ~ "3 Beds",
                   Bed > 4                    ~ "4+ Beds"))
  
- #BC should we do one for stories too? we have only 4 floors at max
+
  houses <- 
   houses %>%
+  mutate(Bath.cat = case_when(
+                  Bath >= 0 & Bath < 1  ~ "1 Bathroom",
+                  Bath >= 2 & Bath < 3  ~ "2 Bathrooms",
+                  Bath > 3                    ~ "3+ Bathrooms"))
  
-  mutate(Stories.cat = case_when(
-                  Stories >= 0 & Stories < 3  ~ "Up to 2 Stories",
-                  Stories >= 3 & Stories < 4  ~ "3 Stories",
-                  Stories > 4))
- 
-
  
  #OTHER HOUSE FEATURES
 houses <- houses %>% 
@@ -760,13 +769,17 @@ houses <- houses %>%
          Wall = ifelse(str_detect(XF1, "Wall") | str_detect(XF2, "Wall") | str_detect(XF3, "Wall"), "Wall", "No Wall"),
          Dock = ifelse(str_detect(XF1, "Dock") | str_detect(XF2, "Dock") | str_detect(XF3, "Dock"), "Dock", "No Dock"),
          )
- 
+
+#ZIP CODE 
+ houses <-
+  houses %>%
+  mutate(Mailing.Zip = as.numeric(Mailing.Zip))
  
  
 #payment/income
 employee_pay 
 #i put monthly housing cost and household income in acs data, BUT NOT SURE HOW TO DEAL WITH THAT.
-#AD - already have med household income
+#AD - I dont htink we need employee_pay or low income depressed area because we already have income information by tract from ACS - at this stage in the project I think we need to focus on finalizing what we already have processed
 
 ####low income depressed area##### 
 depressedBuffer <- st_buffer(houses, 0.5*5280) %>%
@@ -817,23 +830,8 @@ n_nece_shop
 
 
 ```{r correlation}
- 
-houses %>% 
-  dplyr::select(SalePrice, Bed.cat, Pool) %>%
-  filter(SalePrice <= 1000000) %>%
-  gather(Variable, Value, -SalePrice) %>% 
-   ggplot(aes(Value, SalePrice)) +
-     geom_bar(position = "dodge", stat = "summary", fun.y = "mean") +
-     facet_wrap(~Variable, ncol = 1, scales = "free") +
-     labs(title = "Price as a function of categorical variables", y = "Mean_Price") +
-     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-     plotTheme()
 
- 
- #split house set
- train <- filter(houses, SalePrice != 0)
- predict <- filter(houses, SalePrice == 0) 
- 
+
  #####housing correlation
 #1*bedrooms
 
@@ -848,22 +846,25 @@ houses %>%
 #6senior vs long term senior
  ####trying to create a salepricesqft
   #corr matrix
- numericVars <- 
-   select_if(st_drop_geometry(houses), is.numeric) %>% na.omit()
- 
- ggcorrplot(
-   round(cor(numericVars), 1), 
-   p.mat = cor_pmat(numericVars),                 #error: need to get rid of NA values, replace w 0
-   colors = c("#25CB10", "white", "#FA7800"),
-   type="lower",
-   insig = "blank") +  
-   labs(title = "Correlation across numeric variables")
+numericVars <- 
+  select_if(st_drop_geometry(houses), is.numeric) %>% na.omit()
+
+ggcorrplot(
+  round(cor(numericVars), 1), 
+  p.mat = cor_pmat(numericVars),
+  colors = c("#25CB10", "white", "#FA7800"),
+  type="lower",
+  insig = "blank") +  
+    labs(title = "Correlation across numeric variables") 
 
 
  #BC: I PUT THE ABOVE CODE IN CONSOLE AND FOUND THAT THESE VARIABLES HAVE #DEEP ORANGE COLOR IN CORRELATION WITH SALEPRICE
  #Land, Bldg, ActualSqFt(>livingsqft=adjustedsqft>Lotsize=bath), age, bed.cat > stories
+#AD: I don't think we can use land - isn't it land value, which is close to SalePrice?
+#AD:, timeToWork, medHHInc, monthhousingcost, pctVacant, pctWhite, pctRenterOcc, busStops, metrorailStops, cultureSpots, parkArea, commercialProperties, distWater, LivingSqFt, Bath, Bed, Mailing.Zip
  #cor test
- cor.test(houses$age, houses$SalePrice, method = "pearson")
+
+ cor.test(houses$Mailing.Zip, houses$SalePrice, method = "pearson")
  cor.test(houses$ActualSqFt, houses$SalePrice, method = "pearson")
  cor.test(houses$Bed.cat, houses$SalePrice, method = "pearson") #NOT NUMERIC NOT WORKING
  cor.test(houses$age, houses$SalePrice, method = "pearson")
@@ -871,17 +872,83 @@ houses %>%
  cor.test(houses$age, houses$SalePrice, method = "pearson")
 
  #reg1
- reg <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>% 
+ reg1 <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>% 
              dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath, LotSize, Stories, Zoning, Bldg, age, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, busStops, distWater, monthlyHousingCosts, tract, Pool, Dock, Patio))
- summary(reg)
+ summary(reg1)
  
-
+ #reg 2 - 0.68 adjusted R^2 
+reg2 <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>% 
+             dplyr::select(SalePrice, ActualSqFt, Bath.cat, Bed.cat,
+             medHHInc, monthhousingcost, pctVacant, pctWhite, pctRenterOcc, parkArea, commercialProperties, distWater, Mailing.Zip, Dock, Patio, age, cultureSpots))
+ summary(reg2)
+ 
  
  
 ```
 
-```{r neighborhood fixed effect}
-############data wrangling###############
+```{r Generalizability}
+
+#MAKE TRAIN AND TEST SETS
+inTrain <- createDataPartition(
+              y = paste(houses$Bath.cat, houses$Bath.cat, houses$highCatch, houses$middleCatch, houses$elemCatch, houses$Bath.cat, houses$Bed.cat), 
+              p = .60, list = FALSE)
+miami.training <- houses[inTrain,] 
+miami.test <- houses[-inTrain,]  
+ 
+reg.training <- 
+  lm(SalePrice ~ ., data = st_drop_geometry(miami.training) %>% 
+                             dplyr::select(SalePrice, ActualSqFt, 
+             medHHInc, monthhousingcost, pctVacant, pctWhite, pctRenterOcc, busStops, parkArea, commercialProperties, distWater, Mailing.Zip, Pool, Dock, Patio, Fence, age, cultureSpots))
+
+#Regression
+miami.test <-
+  miami.test %>%
+  mutate(Regression = "Baseline Regression",
+         SalePrice.Predict = predict(reg.training, miami.test),
+         SalePrice.Error = SalePrice.Predict - SalePrice,
+         SalePrice.AbsError = abs(SalePrice.Predict - SalePrice),
+         SalePrice.APE = (abs(SalePrice.Predict - SalePrice)) / SalePrice.Predict)%>%
+  filter(SalePrice < 5000000) 
+
+#Mean error and APE
+mean(miami.test$SalePrice.AbsError, na.rm = T)
+mean(miami.test$SalePrice.APE, na.rm = T)
+
+#Testing effect of different features
+effect_plot(reg.training, pred = distWater, interval = TRUE, plot.points = TRUE) #distWater only matters for first 1 mile
+effect_plot(reg.training, pred = parkArea, interval = TRUE, plot.points = TRUE) #parkArea only matters to 1e +06
+effect_plot(reg.training, pred = age, interval = TRUE, plot.points = TRUE) #age doesn't look super correlated
+
+#PLot predicted price vs % error
+ggplot(data = miami.test, aes(x = SalePrice.Predict, y = SalePrice.APE)) + geom_point()
+
+
+
+#K Folds test 
+fitControl <- trainControl(method = "cv", number = 100)
+set.seed(825)
+
+reg.cv <- 
+  train(SalePrice ~ ., data = st_drop_geometry(houses) %>% 
+                                dplyr::select(SalePrice, ActualSqFt, 
+             medHHInc, monthhousingcost, pctVacant, pctWhite, pctRenterOcc, busStops, parkArea, commercialProperties, distWater, Mailing.Zip, Pool, Dock, Patio, Fence, age, cultureSpots), 
+     method = "lm", trControl = fitControl, na.action = na.pass)
+
+reg.cv
+
+
+ggplot() + 
+  geom_sf(data = miami.test, aes(colour = q5(SalePrice.APE))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+ggplot() + 
+  geom_sf(data = miami.test, aes(colour = q5(SalePrice.Predict))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+```
+
+```{r neighborhood effect, etc}
 library(knitr)
 library(kableExtra)
 library(scales)
@@ -916,7 +983,9 @@ source("https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-L
 
 
 #neighborhoods for miami beach
-nhoods_fl <- aoi_boundary_HARV <- st_read("E:/Upenn/CPLN508/miami/zillow_nghbrhd_feb17/zillow_nghbrhd_feb17.shp")
+#AD: added file folder to RAW DATA
+#nhoods_fl <- aoi_boundary_HARV <- st_read("E:/Upenn/CPLN508/miami/zillow_nghbrhd_feb17/zillow_nghbrhd_feb17.shp")
+nhoods_fl <- aoi_boundary_HARV <- st_read("/Users/annaduan/Documents/GitHub/Miami-Oct12/Raw\ Data/zillow_nghbrhd_feb17/zillow_nghbrhd_feb17.shp")
 nhoods_mb <- subset(nhoods_fl, CITY == "MIAMI BEACH")%>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658')
@@ -925,28 +994,7 @@ nhoods_m <- subset(nhoods_fl, CITY == "MIAMI")%>%
   st_transform('ESRI:102658')
 
 nhoods <- rbind(nhoods_mb, nhoods_m)
-  
-inTrain <- createDataPartition(
-              y = paste(miamiBound$v1, miamiBound$v2, 
-                        miamiBound$v3, miamiBound$v4), #our four housing variables
-              p = .60, list = FALSE)
-miami.training <- miamiBound[inTrain,] 
-miami.test <- miamiBound[-inTrain,]  
- 
-reg.training <- 
-  lm(SalePrice ~ ., data = as.data.frame(miami.training) %>% 
-                             dplyr::select(SalePrice, Lotsize, AdjustedSqFt, 
-                                           GROSS_AREA, Stories,
-                                           Bed.cat)) #not sure what to put in for now
 
-miami.test <-
-  miami.test %>%
-  mutate(Regression = "Baseline Regression",
-         SalePrice.Predict = predict(reg.training, miami.test),
-         SalePrice.Error = SalePrice.Predict - SalePrice,
-         SalePrice.AbsError = abs(SalePrice.Predict - SalePrice),
-         SalePrice.APE = (abs(SalePrice.Predict - SalePrice)) / SalePrice.Predict)%>%
-  filter(SalePrice < 5000000) 
 
 
 ############test for clustering##############
@@ -1051,10 +1099,8 @@ st_drop_geometry(bothRegressions) %>%
 
 
 ########test the effects of indirect variables maybe?########
-
+  
 ```
-
-
 
 ```{r testing figures}
 ####MAP: DEPENDENT VAR. (sale price)####
