@@ -133,6 +133,9 @@ houses <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Dat
   st_transform('ESRI:102658') %>%
   st_centroid()
 
+ggplot() +
+  geom_sf(data = houses, aes(colour = Mailing.Zip)) +
+  mapTheme()
 
 
 #HOUSE DATA OSM (Not projected)
@@ -177,7 +180,11 @@ acs <-
          renterOcc = B07013_003,
          timeToWork = B08012_001,
          monthhousingcost = B25104_001)
- 
+acs["119", "medHHInc"] = 33194   #input value from nearby tract in same neighborhod because NA was messing up MAE
+acs %>% na.omit()
+
+
+
 #mutate
 acs <- 
   acs %>%
@@ -748,15 +755,15 @@ houses <-
   mutate(Bed.cat = case_when(
                   Bed >= 0 & Bed < 3  ~ "Up to 2 Beds",
                   Bed >= 3 & Bed < 4  ~ "3 Beds",
-                  Bed > 4                    ~ "4+ Beds"))
+                  Bed >= 4                    ~ "4+ Beds"))
  
 
  houses <- 
   houses %>%
   mutate(Bath.cat = case_when(
-                  Bath >= 0 & Bath < 1  ~ "1 Bathroom",
-                  Bath >= 2 & Bath < 3  ~ "2 Bathrooms",
-                  Bath > 3                    ~ "3+ Bathrooms"))
+                  Bath < 2  ~ "Up to 1 Bathroom",
+                  Bath == 2  ~ "2 Bathrooms",
+                  Bath >= 3                    ~ "3+ Bathrooms"))
  
  
  #OTHER HOUSE FEATURES
@@ -774,6 +781,10 @@ houses <- houses %>%
  houses <-
   houses %>%
   mutate(Mailing.Zip = as.numeric(Mailing.Zip))
+ 
+ houses <- houses %>%
+      mutate(parkArea = ifelse(is.na(parkArea), 0, parkArea))
+   
  
  
 #payment/income
@@ -995,18 +1006,19 @@ nhoods_m <- subset(nhoods_fl, CITY == "MIAMI")%>%
 
 nhoods <- rbind(nhoods_mb, nhoods_m)
 
+#DATA ALREADY PARTITIONED IN EARLIER SECTION
 
 
 ############test for clustering##############
-coords <- st_coordinates(miamiBound) 
+coords <- st_coordinates(houses) 
 
 neighborList <- knn2nb(knearneigh(coords, 5)) #5 nearest neighborhoods, we can change that 
 
 spatialWeights <- nb2listw(neighborList, style="W") #not sure what is W here
 
-miamiBound$lagPrice <- lag.listw(spatialWeights, miamiBound$SalePrice)
+houses$lagPrice <- lag.listw(spatialWeights, houses$SalePrice)
 
-coords.test <-  st_coordinates(miamiBound.test) 
+coords.test <-  st_coordinates(miami.test) 
 
 neighborList.test <- knn2nb(knearneigh(coords.test, 5))
 
