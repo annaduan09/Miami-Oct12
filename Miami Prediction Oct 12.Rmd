@@ -1,6 +1,6 @@
 ---
 title: "Miami Prediction"
-author: "Anna Duan"
+author: "Anna Duan, Bingchu Chen"
 date: "10/7/2020"
 output: html_document
 ---
@@ -955,12 +955,12 @@ houses <-
 #  st_drop_geometry()
 
 #houses <-
-  left_join(houses, bufferedsta)
+  #left_join(houses, bufferedsta)
 
 #redevelopment 
 
-rede <- as.data.frame(rede)
-houses$rede <- ifelse(st_intersects(houses$geometry, rede$geometry), 1, 0)
+redev <- as.data.frame(redev)
+houses$redev <- ifelse(st_intersects(houses$geometry, redev$geometry), 1, 0)
 
 #shop 
 
@@ -1122,7 +1122,7 @@ houses <- houses %>% st_join(., nhoods, join = st_within)
 #BC: I THINK WE SHOULD JOIN NEIGHBORHOODS BEFORE WE DO THE SEPERATING. VARIABLES "NAMES.Y" MEANS NEIGHBORHOOD NAME AND WE WILL USE THIS LATER
 
 inTrain <- createDataPartition(
-              y = paste(houses$Zoning), 
+              y = paste(houses$Zoning, houses$floodInsureType, houses$NAME.y), 
               p = .60, list = FALSE)
 miami.training <- houses[inTrain,] 
 miami.test <- houses[-inTrain,]  
@@ -1136,13 +1136,13 @@ reg.training <-
 miami.test <-
   miami.test %>%
   mutate(Regression = "Baseline Regression",
-         SalePrice.Predict = predict(reg.training, miami.test),
-         SalePrice.Error = SalePrice.Predict - SalePrice,
-         SalePrice.AbsError = abs(SalePrice.Predict - SalePrice),
-         SalePrice.APE = (abs(SalePrice.Predict - SalePrice)) / SalePrice.Predict)%>%
+         SalePrice.Predict = predict(reg.training, miami.test), #611056.3
+         SalePrice.Error = SalePrice.Predict - SalePrice, #106261.4
+         SalePrice.AbsError = abs(SalePrice.Predict - SalePrice), #488903.4
+         SalePrice.APE = (abs(SalePrice.Predict - SalePrice)) / SalePrice.Predict)%>% #-0.8543894
   filter(SalePrice < 5000000) 
 
-#Mean error and APE 432255.1   0.3407089   443611.7 0.1643853
+#Mean error and APE 432255.1   0.3407089   443611.7 0.1643853 467809 -0.0241117
 mean(miami.test$SalePrice.AbsError, na.rm = T)
 mean(miami.test$SalePrice.APE, na.rm = T)
 
@@ -1158,7 +1158,6 @@ effect_plot(reg.training, pred = age, interval = TRUE, plot.points = TRUE) #age 
 
 #PLot predicted price vs % error
 #BC: THIS SEEMS GREAT!
-=======
 
 #Plot predicted price vs % error
 
@@ -1314,10 +1313,10 @@ reg.nhood <- lm(SalePrice ~ ., data = as.data.frame(miami.training) %>%
 miami.test.nhood <-
   miami.test %>%
   mutate(Regression = "Neighborhood Effects",
-         SalePrice.Predict = predict(reg.nhood, miami.test),
-         SalePrice.Error = SalePrice - SalePrice.Predict,        #Dont need these three lines for the final predictions
-         SalePrice.AbsError = abs(SalePrice - SalePrice.Predict),
-         SalePrice.APE = (abs(SalePrice - SalePrice.Predict)) / SalePrice)%>%
+         SalePrice.Predict = predict(reg.nhood, miami.test), #613237.3
+         SalePrice.Error = SalePrice - SalePrice.Predict, # -108442.4      #Dont need these three lines for the final predictions
+         SalePrice.AbsError = abs(SalePrice - SalePrice.Predict), # 491238.7
+         SalePrice.APE = (abs(SalePrice - SalePrice.Predict)) / SalePrice.Predict)%>% #0.7109973
   filter(SalePrice < 5000000)
 
 
@@ -1325,9 +1324,9 @@ miami.test.nhood <-
 
 bothRegressions <- 
   rbind(
-    dplyr::select(miami.test, starts_with("SalePrice"), Regression, NAME.x, NAME.y) %>%
+    dplyr::select(miami.test, starts_with("SalePrice"), Regression, NAME.y) %>%
       mutate(lagPriceError = lag.listw(spatialWeights.test, SalePrice.Error)),
-    dplyr::select(miami.test.nhood, starts_with("SalePrice"), Regression, NAME.x, NAME.y) %>%
+    dplyr::select(miami.test.nhood, starts_with("SalePrice"), Regression, NAME.y) %>%
       mutate(lagPriceError = lag.listw(spatialWeights.test, SalePrice.Error)))   
 
 
@@ -1338,7 +1337,10 @@ st_drop_geometry(bothRegressions) %>%
     summarize(meanValue = mean(Value, na.rm = T)) %>%
     spread(Variable, meanValue) %>%
     kable()
-# BC: the Neighborhoods effects APE is inf, not sure why
+# BC: 
+#Regression	SalePrice.AbsError	SalePrice.APE
+#Baseline Regression	488903.4	-0.8543894
+#Neighborhood Effects	491238.7	0.7109973
 
 # BC: THESE TWO SETS OF MAP LOOK ALMOST THE SAME
 bothRegressions %>%
@@ -1384,7 +1386,7 @@ st_drop_geometry(bothRegressions) %>%
                           name = "MAPE") +
       labs(title = "Mean test set MAPE by neighborhood") +
       mapTheme()
-#BC: THIS IS LOOKING WEIRD, IT HAS SOMETHING TO DO WITH THE inf EARLIER IN THE neighborhoood APE
+#BC: I THINK THEY LOOK GREAT!!
 
 ########test the effects of indirect variables maybe?########
 
@@ -1422,9 +1424,15 @@ st_join(bothRegressions, acs) %>%
   spread(incomeContext, mean.MAPE) %>%
   kable(caption = "Test set MAPE by neighborhood income context")
 
+#BC: THEY ARE SO DIFFERENT, MAYBE WE SHOULD ASK THIS IN THE OFFICE HOUR
 
+#Regression	Majority Non-White	Majority White
+#Baseline Regression	-761%	93%
+#Neighborhood Effects	36%	81%
 
-
+#Regression	High Income	Low Income
+#Baseline Regression	137%	-282%
+#Neighborhood Effects	-31%	163%
 
 #####MAKE PREDICTIONS FOR HOUSE SALE PRICES######
 #876 rows 
@@ -1433,11 +1441,14 @@ miami.test.nhood <-
   miami.test %>%
   mutate(SalePrice.Predict = predict(reg.nhood, miami.test,
          TeamName = ))
-
+#BC: I got this error when running this
+#Problem with `mutate()` input `SalePrice.Predict`.
+#i prediction from a rank-deficient fit may be misleading
+#i Input `SalePrice.Predict` is `predict(reg.nhood, miami.test, TeamName = )`.prediction from a rank-deficient fit may be misleading
 ```
 
 ```{r testing figures}
-####MAP: DEPENDENT VAR. (sale price)####
+####MAP: DEPENDENT VAR. (sale price)#### BC: what is this for?
 ggplot() +
   geom_sf(data = acs, colour = "white", fill = "gray") +
   geom_sf(data = train, aes(colour = q5(SalePrice)), 
@@ -1489,10 +1500,10 @@ ggplot(data = housesKnown, aes(x = distWater, y = SalePrice)) +
 ggplot(data = housesKnown, aes(x = parkArea, y = SalePrice)) +
   geom_point(size=2, shape=20) +
   geom_smooth(method = "lm", se=F, colour = "green")
-  #elem catch
+  #elem catch #BC: how to read this map?
 ggplot(data = housesKnown, aes(x = elemCatch, y = SalePrice)) +
   geom_point(size=2, shape=20)
-  #bus stops - interesting that houses with more nearby cost less - maybe because they're near the street
+  #bus stops - interesting that houses with more nearby cost less - maybe because they're near the street #BC:maybe, or maybe the distribution of bus stops are intended to be in those poor neighborhood/depressed area?
 ggplot(data = housesKnown, aes(x = busStops, y = SalePrice)) +
   geom_point(size=2, shape=20) +
   geom_smooth(method = "lm", se=F, colour = "green")
