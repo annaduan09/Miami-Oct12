@@ -568,12 +568,6 @@ n_nece_shop <- n_nece_shop[!(n_nece_shop$shop == "" | is.na(n_nece_shop$shop) | 
  houses <-
    houses %>% 
    mutate(
-     #contaminated
-      contamNN1 = nn_function(st_c(st_centroid(houses)), st_c(contaminated), 1),
-     contamNN2 = nn_function(st_c(st_centroid(houses)), st_c(contaminated), 2),
-     contamNN3 = nn_function(st_c(st_centroid(houses)), st_c(contaminated), 3),
-     contamNN4 = nn_function(st_c(st_centroid(houses)), st_c(contaminated), 4),
-     contamNN5 = nn_function(st_c(st_centroid(houses)), st_c(contaminated), 5),
      #commercial properties NN
      commNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(commercial)), 2),
      #parks (I STILL CANT LOAD PARK DATA :(
@@ -789,8 +783,7 @@ houses <-
   mutate(distWater.cat = case_when(
                   distWater < 0.2  ~ "Less than 1/5 Mile",
                   distWater >= 0.2 & distWater < 1.05  ~ "1/5 - 1 Miles",
-                  distWater >= 1.05 & distWater < 1.5  ~ "1 - 1.5 Miles",
-                  distWater >= 1.5                    ~ "1.5+ Miles"))
+                  distWater >= 1.05                    ~ "More than 1 Mile"))
  
   houses <- 
   houses %>%
@@ -798,11 +791,7 @@ houses <-
                   TOD == 1  ~ "TOD",
                   TOD == 0  ~ "Non TOD"))
   
-houses <- 
-  houses %>%
-  mutate(contaminated.cat = case_when(
-                  contaminated == 1  ~ "Contam Zone",
-                  contaminated == 0  ~ "Non Contam"))
+
  
  
  #OTHER HOUSE FEATURES
@@ -1022,7 +1011,7 @@ ggcorrplot(
 #AD:, timeToWork, medHHInc, monthhousingcost, pctVacant, pctWhite, pctRenterOcc, busStops, metrorailStops, cultureSpots, parkArea, commercialProperties, distWater, LivingSqFt, Bath, Bed, Mailing.Zip
  #cor test (BC: not sure if er need to keep this)
 
- cor.test(houses$floodInsureType, houses$SalePrice, method = "pearson")
+ cor.test(houses$busStops, houses$SalePrice, method = "pearson")
  cor.test(houses$ActualSqFt, houses$SalePrice, method = "pearson")
  cor.test(houses$Bed.cat, houses$SalePrice, method = "pearson") #NOT NUMERIC NOT WORKING
  cor.test(houses$age, houses$SalePrice, method = "pearson")
@@ -1046,7 +1035,7 @@ reg2 <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>%
  #reg 3: descending order of correlations - 0.72 adjusted R^2
  #AD: flood insure type is great!
  reg3 <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>% 
-             dplyr::select(SalePrice, ActualSqFt, Zoning, Stories.cat, elemCatch, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, pctVacant, pctRenterOcc, monthhousingcost, Patio, Wall, foodEstablishments, metromoverStops, metrorailStops, parkArea, TOD, floodInsureType, schoolDist, ))
+             dplyr::select(SalePrice, ActualSqFt, Zoning, Stories.cat, elemCatch, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, pctVacant, pctRenterOcc, monthhousingcost, Patio, Wall, foodEstablishments, metromoverStops, metrorailStops, parkArea, TOD, floodInsureType, schoolDist, distWater))
  summary(reg3)
 
  
@@ -1056,7 +1045,7 @@ reg2 <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>%
 
 #MAKE TRAIN AND TEST SETS
 inTrain <- createDataPartition(
-              y = paste(houses$Bath.cat, houses$Bath.cat, houses$highCatch, houses$middleCatch, houses$elemCatch, houses$Bath.cat, houses$Bed.cat), 
+              y = paste(houses$Zoning), 
               p = .60, list = FALSE)
 miami.training <- houses[inTrain,] 
 miami.test <- houses[-inTrain,]  
@@ -1065,8 +1054,7 @@ miami.test <- houses[-inTrain,]
 #AD: sorry - probably because of the park file (parkArea) - should work now! 
 reg.training <- 
   lm(SalePrice ~ ., data = st_drop_geometry(miami.training) %>% 
-                             dplyr::select(SalePrice, ActualSqFt, 
-             medHHInc, monthhousingcost, pctVacant, pctWhite, pctRenterOcc, busStops, parkArea, commercialProperties, distWater, Mailing.Zip, Pool, Dock, Patio, Fence, age, cultureSpots))
+                             dplyr::select(SalePrice, ActualSqFt, Zoning, Stories.cat, elemCatch, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, pctVacant, pctRenterOcc, monthhousingcost, Patio, Wall, foodEstablishments, metromoverStops, metrorailStops, parkArea, TOD, floodInsureType, schoolDist))
 
 #Regression
 miami.test <-
@@ -1098,8 +1086,7 @@ set.seed(825)
 
 reg.cv <- 
   train(SalePrice ~ ., data = st_drop_geometry(houses) %>% 
-                                dplyr::select(SalePrice, ActualSqFt, 
-             medHHInc, monthhousingcost, pctVacant, pctWhite, pctRenterOcc, busStops, parkArea, commercialProperties, distWater, Mailing.Zip, Pool, Dock, Patio, Fence, age, cultureSpots), 
+                                dplyr::select(SalePrice, ActualSqFt, Zoning, Stories.cat, elemCatch, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, pctVacant, pctRenterOcc, monthhousingcost, Patio, Wall, foodEstablishments, metromoverStops, metrorailStops, parkArea, TOD, floodInsureType, schoolDist), 
      method = "lm", trControl = fitControl, na.action = na.pass)
 
 reg.cv
@@ -1290,7 +1277,74 @@ ggplot() +
 
 ```{r final figures}
 #i am about to add single regression here too
-#distance to water
+#AD: i added the required figures from the assignment descriptions
+
+
+
+
+
+#table of summary statistics with variable descriptions, sorted by category
+
+#correlation matrix
+numericVars <- 
+  select_if(st_drop_geometry(houses), is.numeric) %>% na.omit()
+
+
+ggcorrplot(
+  round(cor(numericVars), 1), 
+  p.mat = cor_pmat(numericVars),
+  colors = c("#25CB10", "white", "#FA7800"),
+  type="lower",
+  insig = "blank") +  
+    labs(title = "Correlation across numeric variables") 
+
+#4 home price correlation scatterplots
+housesKnown <- houses %>%
+  filter(.,SalePrice != 0)
+  #water
+ggplot(data = housesKnown, aes(x = distWater, y = SalePrice)) +
+  geom_point(size=2, shape=20)  +
+  geom_smooth(method = "lm", se=F, colour = "green")
+  #parks
+ggplot(data = housesKnown, aes(x = parkArea, y = SalePrice)) +
+  geom_point(size=2, shape=20) +
+  geom_smooth(method = "lm", se=F, colour = "green")
+  #elem catch
+ggplot(data = housesKnown, aes(x = elemCatch, y = SalePrice)) +
+  geom_point(size=2, shape=20)
+  #bus stops - interesting that houses with more nearby cost less - maybe because they're near the street
+ggplot(data = housesKnown, aes(x = busStops, y = SalePrice)) +
+  geom_point(size=2, shape=20) +
+  geom_smooth(method = "lm", se=F, colour = "green")
+
+
+#map of your dependent variable (sale price)
+  #water is just for mapping visuals
+water <- st_read("https://opendata.arcgis.com/datasets/bf9de3192c9c4e458d1453f6d4c88d6c_0.geojson") %>%
+ st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
+  st_transform('ESRI:102658') 
+water %>%
+  st_intersection(water, miamiBound)
+
+ggplot() +
+  geom_sf(data = acs, fill = "white", colour = "gray") +
+  geom_sf(data = water, fill = "dark blue", colour = "dark blue") +
+  geom_sf(data = housesKnown, aes(colour = q5(SalePrice))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+#3 maps of 3 of your most interesting independent variables
+
+#polished table of  (training set) lm summary results (coefficients, R2 etc)
+#polished table of mean absolute error and MAPE for a single test set
+#results of your cross-validation tests
+#plot your cross-validation MAE as a histogram
+#Plot predicted prices as a function of observed prices
+#map of your residuals for your test set. Include a Moran’s I test and a plot of the spatial lag in errors. 
+#map of your predicted values for where ‘toPredict’ is both 0 and 1
+#Using the test set predictions, provide a map of mean absolute percentage error (MAPE) by neighborhood
+#scatterplot plot of MAPE by neighborhood as a function of mean price by neighborhood. 
+#Using tidycensus, split your city in to two groups (perhaps by race or income) and test your model’s generalizability.
+
 
 waterReg <- lm(SalePrice ~ distWater, data = houses)
 summary(waterReg)
@@ -1306,29 +1360,6 @@ ggplot() +
   scale_fill_manual(values = palette5) +
   mapTheme()
 
-#County.Senior
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(County.Senior))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#County.LongTermSenior
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(County.LongTermSenior))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#City.Senior
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(City.Senior))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#City.LongTermSenior
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(City.LongTermSenior))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
 
 #Land.Use
 ggplot() + 
@@ -1638,11 +1669,6 @@ ggplot() +
   scale_fill_manual(values = palette5) +
   mapTheme()
 
-#rede #BC:many NAs
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(rede))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
 
 
 
