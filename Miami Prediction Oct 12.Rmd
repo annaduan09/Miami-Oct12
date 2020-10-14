@@ -1285,6 +1285,9 @@ ggplot() +
 
 #table of summary statistics with variable descriptions, sorted by category
 
+
+
+
 #correlation matrix
 numericVars <- 
   select_if(st_drop_geometry(houses), is.numeric) %>% na.omit()
@@ -1297,6 +1300,11 @@ ggcorrplot(
   type="lower",
   insig = "blank") +  
     labs(title = "Correlation across numeric variables") 
+
+
+
+
+
 
 #4 home price correlation scatterplots
 housesKnown <- houses %>%
@@ -1318,6 +1326,9 @@ ggplot(data = housesKnown, aes(x = busStops, y = SalePrice)) +
   geom_smooth(method = "lm", se=F, colour = "green")
 
 
+
+
+
 #map of your dependent variable (sale price)
   #water is just for mapping visuals
 water <- st_read("https://opendata.arcgis.com/datasets/bf9de3192c9c4e458d1453f6d4c88d6c_0.geojson") %>%
@@ -1329,6 +1340,11 @@ ggplot() +
   geom_sf(data = housesKnown, aes(colour = q5(SalePrice))) +
   scale_fill_manual(values = palette5) +
   mapTheme()
+
+
+
+
+
 #3 maps of 3 of your most interesting independent variables
 
 ggplot() +
@@ -1339,30 +1355,65 @@ ggplot() +
   mapTheme()
 
 ggplot() +
-  geom_sf(data = acs, fill = "gray90", colour = "white") +
-  geom_sf(data = parks, fill = "dark green") +
-  scale_fill_manual(values = palette5) +
- labs(title = "Parks", subtitle = "Miami, FL") +
-  mapTheme()
-
-ggplot() +
-  geom_sf(data = acs, aes(fill = q5(timeToWork))) +
-  geom_sf(data = housesKnown, aes(colour = q5(busStops))) +
-  scale_fill_manual(values = palette5) +
-   labs(title = "Bus Stops within Buffer and Travel Time to Work", subtitle = "Miami, FL") +
-  mapTheme()
-
-ggplot() +
   geom_sf(data = acs, aes(fill = q5(medHHInc))) +
   geom_sf(data = housesKnown, aes(colour = q5(floodInsureType))) +
   scale_fill_manual(values = palette5) +
    labs(title = "Flood Insurance Rating", subtitle = "Miami, FL") +
   mapTheme()
 
-
-#Zoning
+#AdjustedSqFt
 ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(Zoning))) +
+  geom_sf(data = houses, aes(colour = q5(AdjustedSqFt))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+
+#TOD
+ggplot() + 
+  geom_sf(data = houses, aes(colour = TOD)) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#SPSqFt
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(SPSqFt))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+
+#commNN1
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(commNN1))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#metrorailStops
+ggplot() + 
+  geom_sf(data = houses, aes(colour = metrorailStops)) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#timeToWork - interesting because it doesn't seem related to distance from center city
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(timeToWork))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#medHHInc - seeems correlated with distance from water
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(medHHInc))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#pctRenterOcc - also related t odistance from water
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(pctRenterOcc))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
+#Pool - funny that there's more pools close to beach
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(Pool))) +
   scale_fill_manual(values = palette5) +
   mapTheme()
 
@@ -1381,310 +1432,6 @@ ggplot() +
 #Using the test set predictions, provide a map of mean absolute percentage error (MAPE) by neighborhood
 #scatterplot plot of MAPE by neighborhood as a function of mean price by neighborhood. 
 #Using tidycensus, split your city in to two groups (perhaps by race or income) and test your model’s generalizability.
-
-
-#Land.Use
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(Land.Use))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-
-
-#Mailing.Zip
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(Mailing.Zip))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#AdjustedSqFt
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(AdjustedSqFt))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#LotSize
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(LotSize))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#Stories
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(Stories))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#Units
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(Units))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#LivingSqFt
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(LivingSqFt))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#ActualSqFt
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(ActualSqFt))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#SPSqFt
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(SPSqFt))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#TOD
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(TOD))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#contaminated #BC FOR SOME REASON NOT WORKING 
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(contaminated))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#contaminatedNN1
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(contaminatedNN1))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#commNN1
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(commNN1))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#metroMNN5
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(metroMNN5))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#metroRNN1
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(metroRNN1))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#busNN1
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(busNN1))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#cultureNN1
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(cultureNN1))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#foodBevNN1
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(foodBevNN1))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#neceshopNN3
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(neceshopNN3))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#nneceshopNN3
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(nneceshopNN3))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#commercialProperties
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(commercialProperties))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#foodEstablishments
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(foodEstablishments))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#cultureSpot #BC: FOR SOME REASON NOT WORKING
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(cultureSpot))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#metrorailStops
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(metrorailStops))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#metromoverStops
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(metromoverStops))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#busStops
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(busStops))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#elemCatch
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(elemCatch))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#middleCatch
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(middleCatch))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#highCatch
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(highCatch))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#schoolDist
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(schoolDist))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#timeToWork
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(timeToWork))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#medHHInc
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(medHHInc))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#monthhousingcost
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(monthhousingcost))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#pctVacant
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(pctVacant))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#pctWhite
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(pctWhite))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#pctRenterOcc
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(pctRenterOcc))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#age
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(age))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#Bed.cat
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(Bed.cat))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#Bath.cat
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(Bath.cat))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#Pool
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(Pool))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#Patio
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(Patio))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-
-#Fence
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(Fence))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#Gazebo
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(Gazebo))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#Carport
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(Carport))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#Wall
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(Wall))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#Dock
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(Dock))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#nece_shop_buffer
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(nece_shop_buffer))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#poor_shop_buffer
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(poor_shop_buffer))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#n_nece_shop_buffer
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(n_nece_shop_buffer))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#redeNN1
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(redeNN1))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
 
 
 
