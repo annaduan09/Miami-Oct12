@@ -1038,7 +1038,6 @@ reg2 <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>%
              dplyr::select(SalePrice, ActualSqFt, Zoning, Stories.cat, elemCatch, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, pctVacant, pctRenterOcc, monthhousingcost, Patio, Wall, foodEstablishments, metromoverStops, metrorailStops, parkArea, TOD, floodInsureType, schoolDist, distWater))
  summary(reg3)
 
- 
 ```
 
 ```{r Generalizability}
@@ -1050,8 +1049,7 @@ inTrain <- createDataPartition(
 miami.training <- houses[inTrain,] 
 miami.test <- houses[-inTrain,]  
 
-#BC:NOT WORKING TOO 
-#AD: sorry - probably because of the park file (parkArea) - should work now! 
+
 reg.training <- 
   lm(SalePrice ~ ., data = st_drop_geometry(miami.training) %>% 
                              dplyr::select(SalePrice, ActualSqFt, Zoning, Stories.cat, elemCatch, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, pctVacant, pctRenterOcc, monthhousingcost, Patio, Wall, foodEstablishments, metromoverStops, metrorailStops, parkArea, TOD, floodInsureType, schoolDist))
@@ -1070,12 +1068,8 @@ miami.test <-
 mean(miami.test$SalePrice.AbsError, na.rm = T)
 mean(miami.test$SalePrice.APE, na.rm = T)
 
-#Testing effect of different features
-effect_plot(reg.training, pred = distWater, interval = TRUE, plot.points = TRUE) #distWater only matters for first 1 mile
-effect_plot(reg.training, pred = parkArea, interval = TRUE, plot.points = TRUE) #parkArea only matters to 1e +06
-effect_plot(reg.training, pred = age, interval = TRUE, plot.points = TRUE) #age doesn't look super correlated
 
-#PLot predicted price vs % error
+#Plot predicted price vs % error
 ggplot(data = miami.test, aes(x = SalePrice.Predict, y = SalePrice.APE)) + geom_point()
 
 
@@ -1199,13 +1193,13 @@ miami.test.nhood <-
   miami.test %>%
   mutate(Regression = "Neighborhood Effects",
          SalePrice.Predict = predict(reg.nhood, miami.test),
-         SalePrice.Error = SalePrice - SalePrice.Predict,
+         SalePrice.Error = SalePrice - SalePrice.Predict,        #Dont need these three lines for the final predictions
          SalePrice.AbsError = abs(SalePrice - SalePrice.Predict),
          SalePrice.APE = (abs(SalePrice - SalePrice.Predict)) / SalePrice)%>%
   filter(SalePrice < 5000000)
 
 
-#############examine the accuracy of heighborhood model########
+#############examine the accuracy of neighborhood model########
 bothRegressions <- 
   rbind(
     dplyr::select(miami.test, starts_with("SalePrice"), Regression, Name) %>%
@@ -1257,6 +1251,16 @@ st_drop_geometry(bothRegressions) %>%
 
 ########test the effects of indirect variables maybe?########
   
+
+
+
+#####MAKE PREDICTIONS FOR HOUSE SALE PRICES######
+#876 rows 
+#filter by toPredict = 1
+miami.test.nhood <-       
+  miami.test %>%
+  mutate(SalePrice.Predict = predict(reg.nhood, miami.test,
+         TeamName = ))
 ```
 
 ```{r testing figures}
@@ -1283,7 +1287,11 @@ ggplot() +
 
 #table of summary statistics with variable descriptions, sorted by category
 
-
+housesSub <- houses %>%
+  dplyr::select("AdjustedSqFt", "LotSize", "Bed", "Bath", "Stories", "age", "commercialProperties", "distWater", "foodEstablishments", "cultureSpots", "busStops", "parkArea", "timeToWork","monthhousingcost","pctVacant")
+       
+st_drop_geometry(housesSub)
+stargazer(as.data.frame(housesSub), type="text", digits=1, title="Descriptive Statistics for Miami Houses", out = "Miami Data.txt")
 
 
 #correlation matrix
@@ -1303,11 +1311,10 @@ ggcorrplot(
 
 
 
-
 #4 home price correlation scatterplots
 housesKnown <- houses %>%
   filter(.,SalePrice != 0)
-  #water
+
 ggplot(data = housesKnown, aes(x = distWater, y = SalePrice)) +
   geom_point(size=2, shape=20)  +
   geom_smooth(method = "lm", se=F, colour = "green")
@@ -1417,18 +1424,24 @@ ggplot() +
 
 #polished table of  (training set) lm summary results (coefficients, R2 etc)
 
+
+
 #polished table of mean absolute error and MAPE for a single test set
 
-#results of your cross-validation tests
+#results of your cross-validation tests #AD: not sure what this means
 
 #plot your cross-validation MAE as a histogram
 
 #Plot predicted prices as a function of observed prices
 
 #map of your residuals for your test set. Include a Moran’s I test and a plot of the spatial lag in errors. 
+
 #map of your predicted values for where ‘toPredict’ is both 0 and 1
+
 #Using the test set predictions, provide a map of mean absolute percentage error (MAPE) by neighborhood
+
 #scatterplot plot of MAPE by neighborhood as a function of mean price by neighborhood. 
+
 #Using tidycensus, split your city in to two groups (perhaps by race or income) and test your model’s generalizability.
 
 
