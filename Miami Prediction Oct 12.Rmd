@@ -1272,8 +1272,6 @@ ggplot() +
   mapTheme()
 ```
 
-```{r cross validation}
-```
 
 ```{r final figures}
 #i am about to add single regression here too
