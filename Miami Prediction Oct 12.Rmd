@@ -67,7 +67,7 @@ plotTheme <- function(base_size = 12) {
   )
 }
 
-palette5 <- c("#25CB10", "#5AB60C", "#8FA108",   "#C48C04", "#FA7800")
+palette5 <- c("#c8ddfa", "#8cb5ed", "#5890db",   "#2868bd", "#023578")
 
 qBr <- function(df, variable, rnd) {
   if (missing(rnd)) {
@@ -1322,43 +1322,65 @@ ggplot(data = housesKnown, aes(x = busStops, y = SalePrice)) +
   #water is just for mapping visuals
 water <- st_read("https://opendata.arcgis.com/datasets/bf9de3192c9c4e458d1453f6d4c88d6c_0.geojson") %>%
  st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
-  st_transform('ESRI:102658') 
-water %>%
-  st_intersection(water, miamiBound)
+  st_transform('ESRI:102658')
 
 ggplot() +
-  geom_sf(data = acs, fill = "white", colour = "gray") +
-  geom_sf(data = water, fill = "dark blue", colour = "dark blue") +
+  geom_sf(data = acs, fill = "gray90", colour = "white") +
   geom_sf(data = housesKnown, aes(colour = q5(SalePrice))) +
   scale_fill_manual(values = palette5) +
   mapTheme()
 #3 maps of 3 of your most interesting independent variables
 
+ggplot() +
+  geom_sf(data = acs, fill = "gray90", colour = "white") +
+  geom_sf(data = housesKnown, aes(colour = q5(parkArea))) +
+  scale_fill_manual(values = palette5) +
+  labs(title = "Nearby Park Area", subtitle = "Miami, FL") +
+  mapTheme()
+
+ggplot() +
+  geom_sf(data = acs, fill = "gray90", colour = "white") +
+  geom_sf(data = parks, fill = "dark green") +
+  scale_fill_manual(values = palette5) +
+ labs(title = "Parks", subtitle = "Miami, FL") +
+  mapTheme()
+
+ggplot() +
+  geom_sf(data = acs, aes(fill = q5(timeToWork))) +
+  geom_sf(data = housesKnown, aes(colour = q5(busStops))) +
+  scale_fill_manual(values = palette5) +
+   labs(title = "Bus Stops within Buffer and Travel Time to Work", subtitle = "Miami, FL") +
+  mapTheme()
+
+ggplot() +
+  geom_sf(data = acs, aes(fill = q5(medHHInc))) +
+  geom_sf(data = housesKnown, aes(colour = q5(floodInsureType))) +
+  scale_fill_manual(values = palette5) +
+   labs(title = "Flood Insurance Rating", subtitle = "Miami, FL") +
+  mapTheme()
+
+
+#Zoning
+ggplot() + 
+  geom_sf(data = houses, aes(colour = q5(Zoning))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+
 #polished table of  (training set) lm summary results (coefficients, R2 etc)
+
 #polished table of mean absolute error and MAPE for a single test set
+
 #results of your cross-validation tests
+
 #plot your cross-validation MAE as a histogram
+
 #Plot predicted prices as a function of observed prices
+
 #map of your residuals for your test set. Include a Moran’s I test and a plot of the spatial lag in errors. 
 #map of your predicted values for where ‘toPredict’ is both 0 and 1
 #Using the test set predictions, provide a map of mean absolute percentage error (MAPE) by neighborhood
 #scatterplot plot of MAPE by neighborhood as a function of mean price by neighborhood. 
 #Using tidycensus, split your city in to two groups (perhaps by race or income) and test your model’s generalizability.
-
-
-waterReg <- lm(SalePrice ~ distWater, data = houses)
-summary(waterReg)
-
-ggplot() +
-  geom_sf(data = acs) +
-  geom_sf(data = houses, aes(colour = distWater)) +
-  mapTheme()
-
-#park area #BC: MANY NAs
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(parkArea))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
 
 
 #Land.Use
@@ -1367,11 +1389,6 @@ ggplot() +
   scale_fill_manual(values = palette5) +
   mapTheme()
 
-#Zoning
-ggplot() + 
-  geom_sf(data = houses, aes(colour = q5(Zoning))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
 
 
 #Mailing.Zip
