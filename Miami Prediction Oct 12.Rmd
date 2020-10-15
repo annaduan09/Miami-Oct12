@@ -1153,7 +1153,7 @@ houses = houses[,!(names(houses) %in% drop)] #AD: what is this?
  #BC: CHECK THIS OUT, SO SURPRISED!!!
  #AD: even higher now!
  reg1 <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>% 
-             dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath.cat, LotSize, Stories.cat, Zoning, Bldg, age, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, Pool, Dock, Patio, floodInsureType, highCatch))
+             dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath.cat, LotSize, Stories.cat, Zoning, age, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, Pool, Dock, Patio, floodInsureType, highCatch))
  summary(reg1)
 
 ```
