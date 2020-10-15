@@ -1529,7 +1529,20 @@ mean_sca_hd <-
 
 plot(mean_sca_hd$SalePrice.Predict, mean_sca_hd$SalePrice.APE, main="MAPE by neighborhood as a function of mean price by neighborhood", xlab="mean price by neighborhood", ylab="MAPE by neighborhood")
   
-#https://r-graphics.org/recipe-scatter-labels
+#https://r-graphics.org/recipe-scatter-labels or we can use the method below:
+
+scatter_mae_mean <- ggplot(mean_sca_hd, aes(x = SalePrice.Predict, y = SalePrice.APE)) +
+    geom_point()
+
+scatter_mae_mean +
+  annotate("text", x = 820000, y = -11.7, label = "UPPER EASTSIDE") +
+  annotate("text", x = 330000, y = -6.5, label = "LITTLE HAITI")+
+  annotate("text", x = 1300000.82, y = 6.85325579, label = "NAUTILUS")+
+  annotate("text", x = 631682.30, y = 3.57218432, label = "BISCAYNE POINT")+
+  annotate("text", x = 1557855.78, y = 2.81996319, label = "LA GORCE")+
+  annotate("text", x = 2031665.51, y = 1.95167248, label = "WYNWOOD - EDGEWATER")+
+  annotate("text", x = 890031.19, y = -2.16394539, label = "OVERTOWN")	
+
 ```
 
 ## Does this model work equally for different demographic groups?
@@ -1574,6 +1587,23 @@ st_join(bothRegressions, acsRaceIncome) %>%
 #Regression	High Income	Low Income
 #Baseline Regression	137%	-282%
 #Neighborhood Effects	-31%	163%
+<<<<<<< Updated upstream
+=======
+
+#####MAKE PREDICTIONS FOR HOUSE SALE PRICES######
+#876 rows 
+#filter by toPredict = 1
+miami.test.result <-       
+  miami.test.nhood %>%
+  mutate(SalePricePredict = SalePrice.Predict,
+         TeamName = 'somename')
+miami.predict.result <- miami.test.result[,c('SalePricePredict', 'TeamName')]
+#BC: I got this error when running this
+#Problem with `mutate()` input `SalePrice.Predict`.
+#i prediction from a rank-deficient fit may be misleading
+#i Input `SalePrice.Predict` is `predict(reg.nhood, miami.test, TeamName = )`.prediction from a rank-deficient fit may be misleading
+>>>>>>> Stashed changes
+
 ```
 
 # Discussion
