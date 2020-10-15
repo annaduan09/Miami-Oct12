@@ -1256,13 +1256,14 @@ reg.cv <-
 
 #This includes mean and standard deviation MAE. 
 #Do 100 folds and plot your cross-validation MAE as a histogram
-ggplot(reg.cv$MAE, geom="histogram") +  #should this be average error for each fold? not working properly..
+ggplot(reg.cv$resample, aes(x=MAE)) +  #should this be average error for each fold? not working properly..
+  geom_histogram() +
   plotTheme()
 
 library(lindia)
-gg_reshist(reg.cv)      #try #2
+gg_reshist(reg.cv$finalModel)      #try #2
 # specify number of bins
-gg_reshist(reg.cv, bins = 20)
+gg_reshist(reg.cv$finalModel, bins = 20)
 ```
 ## Do errors cluster?
 ```{r Spatial Lag}
