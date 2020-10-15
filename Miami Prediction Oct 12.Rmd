@@ -1022,7 +1022,6 @@ ggplot() +
 ```
 
 ```{r Train the regression}
-#MATT:refine neighborhood data
 #read FL neighborhoods
 #nhoods_fl <- aoi_boundary_HARV <- st_read("E:/Upenn/CPLN508/miami/zillow_nghbrhd_feb17/zillow_nghbrhd_feb17.shp")
 nhoods_fl <- aoi_boundary_HARV <- st_read("/Users/annaduan/Documents/GitHub/Miami-Oct12/Raw\ Data/zillow_nghbrhd_feb17/zillow_nghbrhd_feb17.shp")
