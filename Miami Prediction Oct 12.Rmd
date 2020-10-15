@@ -1,10 +1,10 @@
 ---
-title: "Miami Prediction"
+title: "Miami Home Sale Price Prediction"
 author: "Anna Duan, Bingchu Chen"
-date: "10/7/2020"
+date: "10/16/2020"
 output: html_document
 ---
-
+# Introduction
 ```{r Setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ####load libraries, etc
@@ -103,7 +103,8 @@ nn_function <- function(measureFrom,measureTo,k) {
 }
 ```
 
-
+# Data
+what we used, how we collected
 ```{r Read Data}
 #projected to NAD 1983 StatePlane Florida East FIPS 0901 Feet
 
@@ -578,7 +579,6 @@ stargazer(as.data.frame(housesSub), type="text", digits=1, title="Descriptive St
 
 ```
 
-
 ```{r Wrangle Data, echo=FALSE}
 
 drop <- c("x","TOD")
@@ -920,15 +920,15 @@ houses %>%
 #BC: OKAY
 
 ####low income depressed area##### 
-depressedBuffer <- st_buffer(houses, 0.5*5280) %>%
-  dplyr::select(Property.Address) %>%
-  st_as_sf()
-buffereddepressed <- st_intersection(depressedBuffer, low_income_depressed) %>%
-  group_by(Property.Address) %>%
-  summarise() %>%
-  st_drop_geometry()
-houses <-
-  left_join(houses, buffereddepressed)
+#depressedBuffer <- st_buffer(houses, 0.5*5280) %>%
+#  dplyr::select(Property.Address) %>%
+#  st_as_sf()
+#buffereddepressed <- st_intersection(depressedBuffer, low_income_depressed) %>%
+#  group_by(Property.Address) %>%
+#  summarise() %>%
+#  st_drop_geometry()
+#houses <-
+#  left_join(houses, buffereddepressed)
 
 ##since depressed area has a wired shape, maybe we can do this too?
 # houses$depressed <- houses %>% 
@@ -938,16 +938,16 @@ houses <-
  
   
 #revitalization
-reviBuffer <- st_buffer(houses, 0.5*5280) %>%
-  dplyr::select(Property.Address) %>%
-  st_as_sf()
-bufferedrevi <- st_intersection(reviBuffer, neighborhood_revitalization) %>%
-  group_by(Property.Address) %>%
-  summarise() %>%
-  mutate(parkArea = units::drop_units(st_area(.))) %>%
-  st_drop_geometry()
-houses <-
-  left_join(houses, bufferedrevi)
+#reviBuffer <- st_buffer(houses, 0.5*5280) %>%
+#  dplyr::select(Property.Address) %>%
+#  st_as_sf()
+#bufferedrevi <- st_intersection(reviBuffer, neighborhood_revitalization) %>%
+#  group_by(Property.Address) %>%
+#  summarise() %>%
+#  mutate(parkArea = units::drop_units(st_area(.))) %>%
+#  st_drop_geometry()
+#houses <-
+#  left_join(houses, bufferedrevi)
 
 #neighborhood stability 
 
@@ -966,43 +966,43 @@ houses <-
 
 #redevelopment 
 
-redev <- as.data.frame(redev)
-houses$redev <- ifelse(st_intersects(houses$geometry, redev$geometry), 1, 0)
+#redev <- as.data.frame(redev)
+#houses$redev <- ifelse(st_intersects(houses$geometry, redev$geometry), 1, 0)
 
 #shop 
 
 #nece_shop buffer
-nece_shop <- nece_shop %>% 
-   mutate(counter = 1) %>%
-   dplyr::select(counter)
-houses$nece_shop_buffer <-
-   st_buffer(houses, 10*5280) %>%
-   aggregate(nece_shop, ., sum) %>% 
-   st_drop_geometry() %>% 
-   mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
-   pull(counter)
+#nece_shop <- nece_shop %>% 
+#   mutate(counter = 1) %>%
+#   dplyr::select(counter)
+#houses$nece_shop_buffer <-
+#   st_buffer(houses, 10*5280) %>%
+#   aggregate(nece_shop, ., sum) %>% 
+#   st_drop_geometry() %>% 
+#   mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
+#   pull(counter)
 
 #poor_shop buffer
-poor_shop <- poor_shop %>% 
-   mutate(counter = 1) %>%
-   dplyr::select(counter)
-houses$poor_shop_buffer <-
-   st_buffer(houses, 10*5280) %>%
-   aggregate(poor_shop, ., sum) %>% 
-   st_drop_geometry() %>% 
-   mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
-   pull(counter)
+#poor_shop <- poor_shop %>% 
+#   mutate(counter = 1) %>%
+#   dplyr::select(counter)
+#houses$poor_shop_buffer <-
+#   st_buffer(houses, 10*5280) %>%
+#   aggregate(poor_shop, ., sum) %>% 
+#   st_drop_geometry() %>% 
+#   mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
+#   pull(counter)
 
 #n_nece_shop buffer
-n_nece_shop <- n_nece_shop %>% 
-   mutate(counter = 1) %>%
-   dplyr::select(counter)
-houses$n_nece_shop_buffer <-
-   st_buffer(houses, 10*5280) %>%
-   aggregate(n_nece_shop, ., sum) %>% 
-   st_drop_geometry() %>% 
-   mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
-   pull(counter)
+#n_nece_shop <- n_nece_shop %>% 
+#   mutate(counter = 1) %>%
+#   dplyr::select(counter)
+#houses$n_nece_shop_buffer <-
+#   st_buffer(houses, 10*5280) %>%
+#   aggregate(n_nece_shop, ., sum) %>% 
+#   st_drop_geometry() %>% 
+#   mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
+#   pull(counter)
 
 ```
 
@@ -1023,6 +1023,7 @@ ggcorrplot(
 
 ```
 
+# Methods
 ```{r Fig 3: SCATTERPLOT home price correlation}
 
 #1: distWater
@@ -1183,6 +1184,8 @@ houses <- houses %>% st_join(., nhoods, join = st_within)
 #Separate by toPredict
 housesKnown <- houses %>%     #AD: we should do this only to known sale prices
   filter(.,toPredict == 0)
+housesUnknown <- houses %>%
+  filter(.,toPredict ==1)
 #Make train and test sets
 inTrain <- createDataPartition(
               y = paste(housesKnown$Zoning, housesKnown$floodInsureType, housesKnown$neighborhood), 
@@ -1198,6 +1201,7 @@ reg.training <-
 
 ```
 
+# Results
 ```{r Fig 6: TABLE Training Set lm}
 #polished table of  (training set) lm summary results (coefficients, R2 etc)
 stargazer(reg.training, type="text", digits=1, title="LM of Training Data", out = "Training LM.txt")
@@ -1229,7 +1233,7 @@ ggplot(data = miami.test, aes(x = SalePrice.Predict, y = SalePrice.APE)) + geom_
 ```{r Fig 7: TABLE of MAE and MAPE for single test set}
 #AD: not sure how to do this
 ```
-
+## Generalizability
 ```{r K-Folds Cross Validation Test}
 #K Folds test 
 fitControl <- trainControl(method = "cv", number = 100)
@@ -1260,7 +1264,7 @@ gg_reshist(reg.cv)      #try #2
 # specify number of bins
 gg_reshist(reg.cv, bins = 20)
 ```
-
+## Do errors cluster?
 ```{r Spatial Lag}
 library(knitr)
 library(kableExtra)
@@ -1340,7 +1344,7 @@ miami.test %>%
 
 
 ```
-
+## Accounting for neighborhood variance
 ```{r Neighborhood Regression}
 left_join(
   st_drop_geometry(miami.test) %>%
@@ -1396,8 +1400,6 @@ st_drop_geometry(bothRegressions) %>%
 
 ```
 
-
-
 ```{r Fig 9:PLOT predicted prices as a function of observed prices}
 bothRegressions %>%
   dplyr::select(SalePrice.Predict, SalePrice, Regression) %>%
@@ -1413,27 +1415,24 @@ bothRegressions %>%
   plotTheme() + theme(plot.title = element_text(size = 18, colour = "black"))
 
 ```
-
-
+## Final predictions
 ```{r Final prediction}
 
 #876 rows 
 #filter by toPredict = 1
-predictions <-                      #AD: why are there so many rows? we should only have 876
-  miami.test %>%
-  mutate(SalePrice.Predict = predict(reg.nhood, miami.test,
+housesPredictions <-                   
+  housesUnknown %>%
+  mutate(SalePrice = predict(reg.nhood, housesUnknown,
          TeamName = Panda)) #AD: what do you think!:)
 #BC: I got this error when running this
 #Problem with `mutate()` input `SalePrice.Predict`.
 #i prediction from a rank-deficient fit may be misleading
 #i Input `SalePrice.Predict` is `predict(reg.nhood, miami.test, TeamName = )`.prediction from a rank-deficient fit may be misleading
 #AD: thats's fine I think, I've seen this warning a lot of times. It worked though!
-predictedPrices <- miami.test %>% dplyr::select(SalePrice.Predict, Folio) %>%
-  st_drop_geometry()
-predictedHouses <- #so that we can map all the sale prices, including predicted
-  houses %>% filter(toPredict == 1) %>%
-  dplyr::select(-SalePrice) %>%
-  left_join(predictedPrices)
+
+allHouses <- houses %>%    #working on adding back to all houses, not done yet
+  filter(toPredict == 0) %>%
+  st_join(housesPredictions)
 ```
 
 ```{r 11: map of predicted values}
@@ -1460,11 +1459,11 @@ st_drop_geometry(bothRegressions) %>%
 
 ```
 
-
 ```{r 13: Scatterplot of MAPE by neighborhood as a function of mean price by neighborhood}
 #AD: not sure how to do this
 ```
 
+## Does this model work equally for different demographic groups?
 ```{r 14: race and income}
 #RACE & INCOME
   #make new layer
@@ -1508,3 +1507,4 @@ st_join(bothRegressions, acsRaceIncome) %>%
 #Neighborhood Effects	-31%	163%
 ```
 
+# Discussion
