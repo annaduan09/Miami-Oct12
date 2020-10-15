@@ -583,8 +583,7 @@ stargazer(as.data.frame(housesSub), type="text", digits=1, title="Descriptive St
 ```{r Wrangle Data, echo=FALSE}
 
 #CONTAMINATION BUFFER
- #BC https://www.ncceh.ca/sites/default/files/Cemetery_setback_distances_surface_water_contamination-Oct_2017.pdf
- #maybe we use use a buffer of 250m?
+
  contamBuffer <- contaminated %>%
    st_buffer(800) %>%
    st_union() %>%
@@ -611,23 +610,14 @@ stargazer(as.data.frame(housesSub), type="text", digits=1, title="Descriptive St
      #metro rail stations
      metroRNN1 = nn_function(st_c(st_centroid(houses)), st_c(metrorail), 1),
      metroRNN5 = nn_function(st_c(st_centroid(houses)), st_c(metrorail), 5),
-     #bus stations
-     busNN1 = nn_function(st_c(st_centroid(houses)), st_c(bus), 1),
-     busNN1 = nn_function(st_c(st_centroid(houses)), st_c(bus), 5),
-     #culture
-     cultureNN1 = nn_function(st_c(st_centroid(houses)), st_c(culture), 1),
-     cultureNN1 = nn_function(st_c(st_centroid(houses)), st_c(culture), 5),
      #food/drinks
      foodBevNN1 = nn_function(st_c(st_centroid(houses)), st_c(foodBev), 1),
      foodBevNN5 = nn_function(st_c(st_centroid(houses)), st_c(foodBev), 5),
      #daily food shopping place 5250.894
      neceshopNN1 = nn_function(st_c(st_centroid(houses)), st_c(nece_shop), 1),
-     neceshopNN5 = nn_function(st_c(st_centroid(houses)), st_c(nece_shop), 5),
-     #parks
-     parkNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 1),
-     parkNN5 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 5)
-     )
 
+     neceshopNN5 = nn_function(st_c(st_centroid(houses)), st_c(nece_shop), 5)
+     ) 
 
 
 #COMMERCIAL BUFFER
@@ -909,31 +899,47 @@ ggcorrplot(
 
 ```
 
-# Methods
-```{r Fig 3: SCATTERPLOT home price correlation}
+
+Three variables that we will explore further are distWater, parkArea, pctVacant, and busStops. We expect that higher distWater and pctVacant values correlate with low sale prices, and parkArea and busStops make nearby houses more expensive and cost more.
+
+	As expected, proximity to the shoreline (low distWater) is desirable, and correlates with higher sale price. Based on figure 3.1, however, this trend is strongest when distWater < 1. This suggests that we need to feature engineer distWater to account for greater correlation at shorter distances.
+	The amount of park area near a house is positively correlated with sale price, although not as strongly as expected. 
+	Surprisingly, the share of a census tract that is vacant has a positive correlation with sale price. This is unexpected because typically, vacant houses correlate with neighborhood disorder and unattractiveness. However, it is possible that these vacancies are the result of new construction and therefore do not make the area less attractive. 
+	Bus stops also defy our understanding of cities: according to TOD theory, homes near transportation should be more attractive. However, as figure 3.3 shows, the number of nearby bus stops correlates negatively with sale price.
+```{r Fig 3: 4 SCATTERPLOT home price correlation}
 
 #1: distWater
 ggplot(data = housesKnown, aes(x = distWater, y = SalePrice)) +
   geom_point(size=2, shape=20)  +
-  geom_smooth(method = "lm", se=F, colour = "green")
+  labs(title = "Figure 3.1: Distance to Shoreline and Sale Price", subtitle = "Miami and Miami Beach, FL") +
+  geom_smooth(method = "lm", se=F, colour = "green") +
+  plotTheme()
 
 #2: parkArea
 ggplot(data = housesKnown, aes(x = parkArea, y = SalePrice)) +
   geom_point(size=2, shape=20) +
-  geom_smooth(method = "lm", se=F, colour = "green")
+  labs(title = "Figure 3.2: Nearby Park Space and Sale Price", subtitle = "Miami and Miami Beach, FL") +
+  geom_smooth(method = "lm", se=F, colour = "green") +
+    plotTheme()
 
-#3: flood insurance type
-ggplot(data = housesKnown, aes(x = floodInsureType, y = SalePrice)) +
-  geom_point(size=2, shape=20)
-
-#4: bus stops - interesting that houses with more nearby cost less - maybe because they're near the street #BC:maybe, or maybe the distribution of bus stops are intended to be in those poor neighborhood/depressed area? #AD: possibly!
+#3: bus stops
 ggplot(data = housesKnown, aes(x = busStops, y = SalePrice)) +
   geom_point(size=2, shape=20) +
-  geom_smooth(method = "lm", se=F, colour = "green")
+ labs(title = "Figure 3.3: Bus Stops and Sale Price", subtitle = "Miami and Miami Beach, FL") +
+  geom_smooth(method = "lm", se=F, colour = "green") +
+    plotTheme()
+
+#4: pctRenter
+ggplot(data = housesKnown, aes(x = pctVacant, y = SalePrice)) +
+  geom_point(size=2, shape=20) +
+ labs(title = "Figure 3.4: Share of Vacant Properties and Sale Price", subtitle = "Miami and Miami Beach, FL") +
+  geom_smooth(method = "lm", se=F, colour = "green") +
+    plotTheme()
 
 ```
+Another method of exploring spatial patterns of variables and their correlation with sale price is by mapping. Figure 4 shows the distribution of known sale prices. Prices are highest in Miami Beach and the shoreline of Miami. It gets progressively lower until it reaches its lowest cluster in the North. This suggests that as expected, the shoreline area is attractive to homebuyers.
 
-```{r Fig 4: MAP Sale Price}
+```{r Fig 4: MAP Sale Price, echo=FALSE}
 #map of your dependent variable (sale price)
   #water is just for mapping visuals
 water <- st_read("https://opendata.arcgis.com/datasets/bf9de3192c9c4e458d1453f6d4c88d6c_0.geojson") %>%
@@ -943,10 +949,11 @@ water <- st_read("https://opendata.arcgis.com/datasets/bf9de3192c9c4e458d1453f6d
   st_intersection(.,miamiBound)
 
 ggplot() +
-  geom_sf(data = acs, fill = "transparent", colour = "light blue") +
+  geom_sf(data = acs, fill = "gray80", colour = "white") +
   geom_sf(data = water, fill = "light blue", colour = "light blue") +
   geom_sf(data = housesKnown, aes(colour = q5(SalePrice))) +
-  scale_fill_manual(values = palette5) +
+  scale_colour_manual(values = paletteMap) +
+  labs(title = "Figure 4: Home Sale Price", subtitle = "Miami and Miami Beach, FL") +
   mapTheme()
 ```
 
@@ -956,65 +963,31 @@ ggplot() +
 
 ggplot() +
   geom_sf(data = acs, fill = "gray90", colour = "white") +
+  geom_sf(data = water, fill = "light blue", colour = "light blue") +
   geom_sf(data = housesKnown, aes(colour = q5(parkArea))) +
   scale_fill_manual(values = palette5) +
-  labs(title = "Nearby Park Area", subtitle = "Miami, FL") +
+  labs(title = "Figure 5.1: Nearby Park Area", subtitle = "Miami, FL") +
   mapTheme()
 
 ggplot() +
-  geom_sf(data = acs, aes(fill = q5(medHHInc))) +
-  geom_sf(data = housesKnown, aes(colour = q5(floodInsureType))) +
-  scale_fill_manual(values = palette5) +
+  geom_sf(data = acs, fill = "gray90", colour = "white") +
+  geom_sf(data = water, fill = "light blue", colour = "light blue") +
+  geom_sf(data = housesKnown, aes(colour = floodInsureType)) +
    labs(title = "Flood Insurance Rating", subtitle = "Miami, FL") +
   mapTheme()
 
 #AdjustedSqFt
-ggplot() +
+
+  geom_sf(data = acs, fill = "gray90", colour = "white") +
+  geom_sf(data = water, fill = "light blue", colour = "light blue") +
   geom_sf(data = houses, aes(colour = q5(AdjustedSqFt))) +
   scale_fill_manual(values = palette5) +
   mapTheme()
 
 
-#?TOD
-ggplot() +
-  geom_sf(data = houses, aes(colour = TOD)) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#SPSqFt
-ggplot() +
-  geom_sf(data = houses, aes(colour = q5(SPSqFt))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-
-#commNN1
-ggplot() +
-  geom_sf(data = houses, aes(colour = q5(commNN1))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#metrorailStops
-ggplot() +
-  geom_sf(data = houses, aes(colour = metrorailStops)) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#timeToWork - interesting because it doesn't seem related to distance from center city
-ggplot() +
-  geom_sf(data = houses, aes(colour = q5(timeToWork))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
 #medHHInc - seeems correlated with distance from water
 ggplot() +
   geom_sf(data = houses, aes(colour = q5(medHHInc))) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
-#pctRenterOcc - also related to distance from water
-ggplot() +
-  geom_sf(data = houses, aes(colour = q5(pctRenterOcc))) +
   scale_fill_manual(values = palette5) +
   mapTheme()
 
@@ -1026,6 +999,7 @@ ggplot() +
 
 ```
 
+# Methods 
 ```{r Designing Regression}
 
 
@@ -1081,9 +1055,11 @@ miami.test <- housesKnown[-inTrain,]
 
 
 #Training regression #edit the variables
-reg.training <-
-  lm(SalePrice ~ ., data = st_drop_geometry(miami.training) %>%
-                             dplyr::select(SalePrice, ActualSqFt, LotSize, Zoning, Stories.cat, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, monthhousingcost, Patio, foodEstablishments, timeToWork,parkArea, floodInsureType))
+
+reg.training <- 
+  lm(SalePrice ~ ., data = st_drop_geometry(miami.training) %>% 
+                             dplyr::select(SalePrice, ActualSqFt, LotSize, Zoning, Stories.cat, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, pctVacant, pctRenterOcc, monthhousingcost, Patio, foodEstablishments, timeToWork, metromoverStops, metrorailStops, parkArea, floodInsureType))
+
 summary(reg.training)
 
 ```
@@ -1102,8 +1078,9 @@ miami.test <-
          SalePrice.Predict = predict(reg.training, miami.test), #751571.5
          SalePrice.Error = SalePrice.Predict - SalePrice, #60608.35
          SalePrice.AbsError = abs(SalePrice.Predict - SalePrice), #363363
-         SalePrice.APE = SalePrice.AbsError / SalePrice.Predict)%>% #0.05589877
-  filter(SalePrice < 5000000)
+         SalePrice.APE = SalePrice.AbsError / SalePrice) %>% #0.05589877  #corrected 
+  filter(SalePrice < 5000000) 
+
 
 #Mean error and APE 432255.1   0.3407089   443611.7 0.1643853 467809 -0.0241117
   #AD: what are the values in line above?
@@ -1114,6 +1091,15 @@ mean(miami.test$SalePrice.Predict, na.rm = T)
 
 #Predicted price vs % error
 ggplot(data = miami.test, aes(x = SalePrice.Predict, y = SalePrice.APE)) + geom_point()
+
+#AD: absolute errors might be high becuase we have large errors on very expensive houses. (APE is low)
+
+hist(miami.test$SalePrice.AbsError)
+hist(miami.test$SalePrice.APE)
+hist(miami.test$SalePrice.Predict)
+
+ggplot(data = miami.test)+geom_point(aes(x = SalePrice, y = SalePrice.AbsError))
+                                     
 ```
 
 ```{r Fig 7: TABLE of MAE and MAPE for single test set}
@@ -1142,9 +1128,10 @@ reg.cv$resample[75,]
 fitControl <- trainControl(method = "cv", number = 100)
 set.seed(825)
 
-reg.cv <-
-  train(SalePrice ~ ., data = st_drop_geometry(housesKnown) %>%
-                                dplyr::select(SalePrice, ActualSqFt, LotSize, Zoning, Stories.cat, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, monthhousingcost, Patio, foodEstablishments, timeToWork,parkArea, floodInsureType),
+
+reg.cv <- 
+  train(SalePrice ~ ., data = st_drop_geometry(housesKnown) %>% 
+                                dplyr::select(SalePrice, ActualSqFt, LotSize, Zoning, Stories.cat, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, pctVacant, pctRenterOcc, monthhousingcost, Patio, foodEstablishments, timeToWork, metromoverStops, metrorailStops, parkArea, floodInsureType), 
      method = "lm", trControl = fitControl, na.action = na.pass)
 
 summary(reg.cv)
@@ -1251,7 +1238,18 @@ ggplot(as.data.frame(moranTest$res[c(1:999)]), aes(moranTest$res[c(1:999)])) +
   #AD: I'm not super clear on this section
 
 miami.test %>% 
+
   mutate(lagPriceError = lag.listw(spatialWeights.test, SalePrice.Error)) %>%   #AD: error here
+
+  ggplot(aes(SalePrice.Error, SalePrice)) +       #what's this for?
+  geom_point() +
+  stat_smooth(aes(SalePrice.Error, SalePrice), 
+            method = "lm", se = FALSE, size = 1, colour="#25CB10")+
+  plotTheme() + theme(plot.title = element_text(size = 18, colour = "black")) 
+  
+
+miami.test %>%                
+  mutate(lagPriceError = lag.listw(spatialWeights.test, SalePrice.Error)) %>%  #AD: fixed it
   ggplot(aes(lagPriceError, SalePrice)) +
   geom_point() +
   stat_smooth(aes(lagPriceError, SalePrice), 
@@ -1268,7 +1266,9 @@ miami.test %>%
   
 
 miami.test %>% 
-  mutate(lagPriceError = lag.listw(spatialWeights.test, SalePrice.Error)) %>%  
+
+  mutate(lagPriceError = lag.listw(spatialWeights.test, SalePrice.Error)) %>%   
+
   ggplot(aes(lagPriceError, SalePrice.Error)) +
   geom_point() +
   stat_smooth(aes(lagPriceError,SalePrice.Error), 
@@ -1294,8 +1294,9 @@ left_join(
 
 
 #Make new neighborhood regression
-reg.nhood <- lm(SalePrice ~ ., data = as.data.frame(miami.training) %>%
-                                 dplyr::select(neighborhood, SalePrice, ActualSqFt, LotSize, Zoning, Stories.cat, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, monthhousingcost, Patio, foodEstablishments, timeToWork,parkArea, floodInsureType))
+
+reg.nhood <- lm(SalePrice ~ ., data = as.data.frame(miami.training) %>% 
+                                 dplyr::select(neighborhood, SalePrice, ActualSqFt, LotSize, Zoning, Stories.cat, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, pctVacant, pctRenterOcc, monthhousingcost, Patio, foodEstablishments, timeToWork, metromoverStops, metrorailStops, parkArea, floodInsureType))
 summary(reg.nhood)
 
 
@@ -1305,7 +1306,7 @@ miami.test.nhood <-
          SalePrice.Predict = predict(reg.nhood, miami.test), #613237.3
          SalePrice.Error = SalePrice - SalePrice.Predict, # -108442.4      
          SalePrice.AbsError = abs(SalePrice - SalePrice.Predict), # 491238.7
-         SalePrice.APE = (abs(SalePrice - SalePrice.Predict)) / SalePrice.Predict)%>% #0.7109973
+         SalePrice.APE = (abs(SalePrice - SalePrice.Predict)) / SalePrice)%>% #0.7109973
   filter(SalePrice < 5000000)
 summary(miami.test.nhood)
 
@@ -1325,10 +1326,12 @@ st_drop_geometry(bothRegressions) %>%
     summarize(meanValue = mean(Value, na.rm = T)) %>%
     spread(Variable, meanValue) %>%
     kable()
+
 # BC:
+
 #Regression	SalePrice.AbsError	SalePrice.APE
-#Baseline Regression	366345.6	0.0494198
-#Neighborhood Effects	365363.5	-1.3121554
+#Baseline Regression	351280.6	0.7101703
+#Neighborhood Effects	354142.8	0.7047983
 
 
 ```
@@ -1355,7 +1358,7 @@ bothRegressions %>%
 #filter by toPredict = 1
 housesPredictions <-                   
   houses %>%
-  mutate(prediction = predict(reg.cv, houses),
+  mutate(prediction = predict(reg.nhood, houses),
          team_name = 'Panda')
 
 predictions <- housesPredictions[,c("Folio", "prediction", "team_name", "toPredict")] %>%
@@ -1386,8 +1389,10 @@ ggplot() +
 names(bothRegressions)[names(bothRegressions) == "neighborhood"] <- "neighborhood"
 st_drop_geometry(bothRegressions) %>%
   group_by(Regression, neighborhood) %>%
+
   summarise(mean.MAPE = mean(SalePrice.APE, na.rm = T)) %>%
   ungroup() %>%
+
   left_join(nhoods) %>%
     st_as_sf() %>%
     ggplot() +
@@ -1398,6 +1403,8 @@ st_drop_geometry(bothRegressions) %>%
                           name = "MAPE") +
       labs(title = "Mean test set MAPE by neighborhood") +
       mapTheme()
+
+#AD: remove points
 
 ```
 
