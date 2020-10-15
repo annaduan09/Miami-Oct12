@@ -1219,6 +1219,17 @@ spatialWeights.test <- nb2listw(neighborList.test, style="W")
 
 #map of your residuals for your test set
 #AD: not sure what this is
+#BC: I searched on Google and I guess this may work
+miami.res = resid(miami.test.nhood)
+
+plot(miami.test.nhood$SalePrice.Predict, miami.res, 
+     ylab="Residuals", xlab="SalePrice", 
+     main="Residual Map") 
+abline(0, 0)  
+
+#or we can do this:
+par(mfrow = c(2, 2))
+plot(reg.cv$finalModel)
 
 #10.1 Moran's I test
 
@@ -1239,30 +1250,30 @@ ggplot(as.data.frame(moranTest$res[c(1:999)]), aes(moranTest$res[c(1:999)])) +
 #10.2 Plot: spatial lag in errors
   #AD: I'm not super clear on this section
 
-miami.test %>%
-  ggplot(aes(SalePrice.Error, SalePrice)) +       #what's this for?
-  geom_point() +
-  stat_smooth(aes(SalePrice.Error, SalePrice),
-            method = "lm", se = FALSE, size = 1, colour="#25CB10")+
-  plotTheme() + theme(plot.title = element_text(size = 18, colour = "black"))
-
-
-miami.test %>%                
-  mutate(lagPriceError = lag.listw(spatialWeights.test, SalePrice.Error)) +  #AD: not working for me
+miami.test %>% 
+  mutate(lagPriceError = lag.listw(spatialWeights.test, SalePrice.Error)) %>%   #AD: error here
   ggplot(aes(lagPriceError, SalePrice)) +
   geom_point() +
-  stat_smooth(aes(lagPriceError, SalePrice),
+  stat_smooth(aes(lagPriceError, SalePrice), 
              method = "lm", se = FALSE, size = 1, colour="#FA7800")+
-  plotTheme() + theme(plot.title = element_text(size = 18, colour = "black"))
+  plotTheme() + theme(plot.title = element_text(size = 18, colour = "black")) 
 
+#BC: I think this regression is not accurate
+miami.test %>% 
+  ggplot(aes(SalePrice.Error, SalePrice)) +
+  geom_point() +
+  stat_smooth(aes(SalePrice.Error, SalePrice), 
+            method = "lm", se = FALSE, size = 1, colour="#25CB10")+
+  plotTheme() + theme(plot.title = element_text(size = 18, colour = "black")) 
+  
 
-miami.test %>%
-  mutate(lagPriceError = lag.listw(spatialWeights.test, SalePrice.Error)) %>%   #AD: not working for me
+miami.test %>% 
+  mutate(lagPriceError = lag.listw(spatialWeights.test, SalePrice.Error)) %>%  
   ggplot(aes(lagPriceError, SalePrice.Error)) +
   geom_point() +
-  stat_smooth(aes(lagPriceError,SalePrice.Error),
+  stat_smooth(aes(lagPriceError,SalePrice.Error), 
              method = "lm", se = FALSE, size = 1, colour="red")+
-  plotTheme() + theme(plot.title = element_text(size = 18, colour = "black"))
+  plotTheme() + theme(plot.title = element_text(size = 18, colour = "black")) 
 
 
 ```
