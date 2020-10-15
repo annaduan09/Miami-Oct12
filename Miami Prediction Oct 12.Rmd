@@ -5,6 +5,7 @@ date: "10/16/2020"
 output: html_document
 ---
 # Introduction
+In this report, we propose a new hedonic model for Zillow's housing market predictions. Accurate prediction of home sale prices is important right now as the real estate market is seeing record levels of activity due to the pandemic. Prediction future home sale prices is challenging due to the number of factors which affect the real estate market and the non-linear relationship between certain factors and prices. In this model, which is built for Miami and Miami Beach, we incorporate local intelligence from open sourced data to adapt it to local housing and development patterns. We use determinants of home prices including internal characteristics, nearby amenities and dis-amenities, and spatial processes such as clustering to estimate home sale prices. Applying this model to a set of 3503 houses, it predicted that home sale prices are highest on the shoreline, and are higher in Miami Beach than in Miami. 
 ```{r Setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ####load libraries, etc
@@ -104,7 +105,7 @@ nn_function <- function(measureFrom,measureTo,k) {
 ```
 
 # Data
-what we used, how we collected
+For this analysis, we received a dataset of houses and their internal characteristics including number of rooms, living area, and pools. In addition, we gathered open sourced data from the American Community Survey, Miami Dade County's Open Data Hub, OpenStreetMaps. This includes  census-tract level demographic information and point and polygon data of amenities including restaurants and parks (Figure 1). It is expected that attributes that contribute to quality of life such as proximity to restaurants, park space, and low commuting times correlate with higher sale prices.
 ```{r Read Data}
 #projected to NAD 1983 StatePlane Florida East FIPS 0901 Feet
 
@@ -581,28 +582,7 @@ stargazer(as.data.frame(housesSub), type="text", digits=1, title="Descriptive St
 
 ```{r Wrangle Data, echo=FALSE}
 
-drop <- c("x","TOD")
-houses = houses[,!(names(houses) %in% drop)]
-#AD: what is this? I'm assuming this was to get rid of extra error columns?
-
-#TOD
- metroRBuffer <- metrorail %>% 
-     st_buffer(0.5*5280) %>% #in feet
-   st_union() %>% 
-   st_as_sf() %>% 
-   mutate(TOD = 1)
-#mark as TOD or not
- houses$TOD <- houses %>% 
-   st_centroid() %>% 
-   st_join(metroRBuffer) %>% 
-   mutate(TOD = ifelse(is.na(metroRBuffer), 0, 1)) %>%
-   pull(TOD)
- 
-
- 
- 
- 
- #CONTAMINATION BUFFER
+#CONTAMINATION BUFFER
  #BC https://www.ncceh.ca/sites/default/files/Cemetery_setback_distances_surface_water_contamination-Oct_2017.pdf
  #maybe we use use a buffer of 250m?
  contamBuffer <- contaminated %>%
@@ -623,31 +603,29 @@ houses = houses[,!(names(houses) %in% drop)]
    houses %>% 
    mutate(
      #commercial properties NN
-     commNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(commercial)), 2),
-     #park
-     parkNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 1),
-     parkNN2 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 2),
-     parkNN3 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 3),
-     parkNN4 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 4),
-     parkNN5 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 5),
+     commNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(commercial)), 1),
+     commNN5 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(commercial)), 5),
      #metro mover stations
+     metroMNN1 = nn_function(st_c(st_centroid(houses)), st_c(metromover), 1),
      metroMNN5 = nn_function(st_c(st_centroid(houses)), st_c(metromover), 5),
      #metro rail stations
      metroRNN1 = nn_function(st_c(st_centroid(houses)), st_c(metrorail), 1),
+     metroRNN5 = nn_function(st_c(st_centroid(houses)), st_c(metrorail), 5),
      #bus stations
      busNN1 = nn_function(st_c(st_centroid(houses)), st_c(bus), 1),
+     busNN1 = nn_function(st_c(st_centroid(houses)), st_c(bus), 5),
      #culture
      cultureNN1 = nn_function(st_c(st_centroid(houses)), st_c(culture), 1),
+     cultureNN1 = nn_function(st_c(st_centroid(houses)), st_c(culture), 5),
      #food/drinks
      foodBevNN1 = nn_function(st_c(st_centroid(houses)), st_c(foodBev), 1),
+     foodBevNN5 = nn_function(st_c(st_centroid(houses)), st_c(foodBev), 5),
      #daily food shopping place 5250.894
-     neceshopNN3 = nn_function(st_c(st_centroid(houses)), st_c(nece_shop), 3),
-     #poor people shopping place 8617.399
-     poorshopNN1 = nn_function(st_c(st_centroid(houses)), st_c(poor_shop), 1),
-     #leisure shopping place 4102.703
-     nneceshopNN3 = nn_function(st_c(st_centroid(houses)), st_c(n_nece_shop), 3),
-     #redevelopment 
-    # redeNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(redev)), 3)
+     neceshopNN1 = nn_function(st_c(st_centroid(houses)), st_c(nece_shop), 1),
+     neceshopNN5 = nn_function(st_c(st_centroid(houses)), st_c(nece_shop), 5),
+     #parks
+     parkNN1 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 1),
+     parkNN5 = nn_function(st_c(st_centroid(houses)), st_c(st_centroid(parks)), 5)
      ) 
 
  
@@ -838,8 +816,8 @@ houses <-
  houses <- 
   houses %>%
   mutate(distWater.cat = case_when(
-                  distWater < 1  ~ "Less than 1 Mile",
-                  distWater >= 1                    ~ "More than 1 Mile"))
+                  distWater < 0.25  ~ "Less than 1/4 Mile",
+                  distWater >= 0.25   ~ "More than 1/4 Mile"))
  
   
  houses <- 
@@ -879,9 +857,6 @@ houses <- houses %>%
          highCatch = ifelse(is.na(highCatch), "other", highCatch),
          ) 
  
- #set of houses with missing ACS values - don't need this anymore
-# houseNA <- subset(houses[c("441","579","580","581","1016","1372","1557","1853","2140","2557","2563","2571","2603","2786","2981","3050","3361"),])
- 
 
  
 #park
@@ -889,8 +864,8 @@ houses <- houses %>%
      mutate(parkArea = ifelse(is.na(parkArea), 0, parkArea))
  
  #acs - here I found the location of NA values and gave these houses the ACS values of houses nearby/in same neighborhood
- houses["3487", "NAME"] = houses["1099", "NAME"]
- houses["3487","timeToWork"] =  houses["1099","timeToWork"]
+houses["3487", "NAME"] = houses["1099", "NAME"]
+houses["3487","timeToWork"] =  houses["1099","timeToWork"]
 houses["3487", "medHHInc"] = houses["1099", "medHHInc"]
 houses["3487", "monthhousingcost"] = houses["1099", "monthhousingcost"]
 houses["3487", "pctVacant"] = houses["1099", "pctVacant"]
@@ -912,106 +887,16 @@ houses %>%
   dplyr::select(-Property.Zip)
 
 
- 
-#payment/income
-
-#i put monthly housing cost and household income in acs data, BUT NOT SURE HOW TO DEAL WITH THAT.
-#AD - I dont htink we need employee_pay or low income depressed area because we already have income information by tract from ACS - at this stage in the project I think we need to focus on finalizing what we already have processed
-#BC: OKAY
-
-####low income depressed area##### 
-#depressedBuffer <- st_buffer(houses, 0.5*5280) %>%
-#  dplyr::select(Property.Address) %>%
-#  st_as_sf()
-#buffereddepressed <- st_intersection(depressedBuffer, low_income_depressed) %>%
-#  group_by(Property.Address) %>%
-#  summarise() %>%
-#  st_drop_geometry()
-#houses <-
-#  left_join(houses, buffereddepressed)
-
-##since depressed area has a wired shape, maybe we can do this too?
-# houses$depressed <- houses %>% 
- #  st_join(depressedBuffer) %>% 
- #  mutate(depressed = ifelse(is.na(depressed), 0, 1)) %>%
- #  pull(depressed)
- 
-  
-#revitalization
-#reviBuffer <- st_buffer(houses, 0.5*5280) %>%
-#  dplyr::select(Property.Address) %>%
-#  st_as_sf()
-#bufferedrevi <- st_intersection(reviBuffer, neighborhood_revitalization) %>%
-#  group_by(Property.Address) %>%
-#  summarise() %>%
-#  mutate(parkArea = units::drop_units(st_area(.))) %>%
-#  st_drop_geometry()
-#houses <-
-#  left_join(houses, bufferedrevi)
-
-#neighborhood stability 
-
-#BC: ??? NOT WORKING FOR NOW 
-#sta_buffer <- st_buffer(houses, 0.5*5280) %>%
-#  dplyr::select(Property.Address) %>%
-#  st_as_sf()
-#bufferedsta <- st_intersection(sta_buffer, nbh_stability) %>%
-#  group_by(Property.Address) %>%
-#  summarise() %>%
-#  mutate(parkArea = units::drop_units(st_area(.))) %>%
-#  st_drop_geometry()
-
-#houses <-
-  #left_join(houses, bufferedsta)
-
-#redevelopment 
-
-#redev <- as.data.frame(redev)
-#houses$redev <- ifelse(st_intersects(houses$geometry, redev$geometry), 1, 0)
-
-#shop 
-
-#nece_shop buffer
-#nece_shop <- nece_shop %>% 
-#   mutate(counter = 1) %>%
-#   dplyr::select(counter)
-#houses$nece_shop_buffer <-
-#   st_buffer(houses, 10*5280) %>%
-#   aggregate(nece_shop, ., sum) %>% 
-#   st_drop_geometry() %>% 
-#   mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
-#   pull(counter)
-
-#poor_shop buffer
-#poor_shop <- poor_shop %>% 
-#   mutate(counter = 1) %>%
-#   dplyr::select(counter)
-#houses$poor_shop_buffer <-
-#   st_buffer(houses, 10*5280) %>%
-#   aggregate(poor_shop, ., sum) %>% 
-#   st_drop_geometry() %>% 
-#   mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
-#   pull(counter)
-
-#n_nece_shop buffer
-#n_nece_shop <- n_nece_shop %>% 
-#   mutate(counter = 1) %>%
-#   dplyr::select(counter)
-#houses$n_nece_shop_buffer <-
-#   st_buffer(houses, 10*5280) %>%
-#   aggregate(n_nece_shop, ., sum) %>% 
-#   st_drop_geometry() %>% 
-#   mutate(counter = ifelse(is.na(counter), 0, counter)) %>%
-#   pull(counter)
 
 ```
 
 ```{r Fig 2: Correlation Matrix}
 
-#correlation matrix
-numericVars <- 
-  select_if(st_drop_geometry(houses), is.numeric) %>% na.omit()
+corrPlotVars <- houses %>%
+  dplyr::select(-saleDate, -saleType, -saleYear, -Bldg, -Land, -Assessed, -WVDB, -HEX, -GPAR, -County.2nd.HEX, -County.Senior, -County.LongTermSenior, -County.Other.Exempt, -County.Taxable, -City.2nd.HEX, -City.Senior, -City.LongTermSenior, -City.Other.Exempt, -City.Taxable, -MillCode, -Owner1, -Owner2, -Mailing.State, -Mailing.Country, -Legal1, -Legal2, -Legal3, -Legal4, -Legal5, -Legal6, -YearBuilt, -EffectiveYearBuilt, -toPredict)
 
+numericVars <- 
+  select_if(st_drop_geometry(corrPlotVars), is.numeric) %>% na.omit()
 
 ggcorrplot(
   round(cor(numericVars), 1), 
@@ -1019,7 +904,8 @@ ggcorrplot(
   colors = c("#25CB10", "white", "#FA7800"),
   type="lower",
   insig = "blank") +  
-    labs(title = "Correlation across numeric variables") 
+    labs(title = "Figure 2: Sale Price Correlation with Numeric Variables") +
+  plotTheme()
 
 ```
 
@@ -1146,14 +1032,18 @@ ggplot() +
  cor.test(houses$parkArea, houses$SalePrice, method = "pearson")
 
  
- #1: random - 0.826 - LETS DO THIS ONE
- #BC: CHECK THIS OUT, SO SURPRISED!!!
- #AD: even higher now!
- #MATT: MAE cross-validation 
+ #1: 0.71
  reg1 <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>% 
-             dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath.cat, LotSize, Stories.cat, Zoning, age, Bldg, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, Pool, Dock, Patio, floodInsureType, highCatch))
+             dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath.cat, LotSize, Stories.cat, Zoning, age, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, Pool, Dock, Patio, floodInsureType, highCatch))
  summary(reg1)
+ 
+ #2: 0.72   - this one works better with training
+  reg2 <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>% 
+             dplyr::select(SalePrice, ActualSqFt, LotSize, Zoning, Stories.cat, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, pctVacant, pctRenterOcc, monthhousingcost, Patio, foodEstablishments, timeToWork, metromoverStops, metrorailStops, parkArea, floodInsureType))
+ summary(reg2)
+ 
  #what is bldg? Bldg,
+ #AD: not sure but Ken said we can't use
 ```
 
 ```{r Train the regression}
@@ -1175,12 +1065,10 @@ nhoods <- nhoods %>%
   dplyr::select(NAME) %>%
   rename(neighborhood = NAME)
 houses <- houses %>% st_join(., nhoods, join = st_within)
-#BC: I THINK WE SHOULD JOIN NEIGHBORHOODS BEFORE WE DO THE SEPERATING. VARIABLES "NAMES.Y" MEANS NEIGHBORHOOD NAME AND WE WILL USE THIS LATER
-#AD: makes sense. I added some code to get rid of all columns other than neighborhood name. Also renamed NAMES.Y as "neighborhood" to make things clearer.
 
 
 #Separate by toPredict
-housesKnown <- houses %>%     #AD: we should do this only to known sale prices
+housesKnown <- houses %>%    
   filter(.,toPredict == 0)
 housesUnknown <- houses %>%
   filter(.,toPredict ==1)
@@ -1195,12 +1083,9 @@ miami.test <- housesKnown[-inTrain,]
 #Training regression #edit the variables
 reg.training <- 
   lm(SalePrice ~ ., data = st_drop_geometry(miami.training) %>% 
-                             dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath.cat, LotSize, Stories.cat, Zoning, age, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, Pool, Dock, Patio, floodInsureType, highCatch))
+                             dplyr::select(SalePrice, ActualSqFt, LotSize, Zoning, Stories.cat, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, monthhousingcost, Patio, foodEstablishments, timeToWork,parkArea, floodInsureType))
 summary(reg.training)
 
- reg3 <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>% 
-             dplyr::select(SalePrice, ActualSqFt, Zoning, Stories.cat, elemCatch, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, pctVacant, pctRenterOcc, monthhousingcost, Patio, Wall, foodEstablishments, metromoverStops, metrorailStops, parkArea, TOD, floodInsureType, schoolDist, distWater))
- summary(reg3)
 ```
 
 # Results
@@ -1214,10 +1099,10 @@ stargazer(reg.training, type="text", digits=1, title="LM of Training Data", out 
 miami.test <-
   miami.test %>%
   mutate(Regression = "Baseline Regression",
-         SalePrice.Predict = predict(reg.training, miami.test), #730348.4
+         SalePrice.Predict = predict(reg.training, miami.test), #751571.5
          SalePrice.Error = SalePrice.Predict - SalePrice, #60608.35
-         SalePrice.AbsError = abs(SalePrice.Predict - SalePrice), #185887  - much lower now that we only use known SalePrices
-         SalePrice.APE = (abs(SalePrice.Predict - SalePrice)) / SalePrice.Predict)%>% #0.7169534
+         SalePrice.AbsError = abs(SalePrice.Predict - SalePrice), #363363
+         SalePrice.APE = SalePrice.AbsError / SalePrice.Predict)%>% #0.05589877
   filter(SalePrice < 5000000) 
 
 #Mean error and APE 432255.1   0.3407089   443611.7 0.1643853 467809 -0.0241117
@@ -1228,7 +1113,6 @@ mean(miami.test$SalePrice.Predict, na.rm = T)
 
 
 #Predicted price vs % error
-#BC: THIS SEEMS GREAT!
 ggplot(data = miami.test, aes(x = SalePrice.Predict, y = SalePrice.APE)) + geom_point()
 ```
 
@@ -1240,18 +1124,17 @@ reg.cv$resample[80,]
 min(reg.cv$resample$MAE)#237439.9
 reg.cv$resample[75,]
 
-stargazer(min(reg.cv$resample$MAE), type="text", digits=1, title="LM of Training Data", out = "Training LM.txt")
 
-reg.cv.rs.min <- as.data.frame(reg.cv$resample[75,])
+#reg.cv.rs.min <- as.data.frame(reg.cv$resample[75,])
 #stargazer(reg.cv.rs.min, type="text", digits=1, title="LM of Training Data", out = "Training LM.txt")
-library(kableExtra)
-reg.cv.rs.min %>%
-  gather(Variable, Value) %>%
-  #filter(Variable == "MAE" | Variable == "RMSE") %>%
-  group_by(Variable) %>%
-    spread(Variable, Value) %>%
-    kable() %>%
-    kable_styling()
+#library(kableExtra)
+#reg.cv.rs.min %>%
+#  gather(Variable, Value) %>%
+#  #filter(Variable == "MAE" | Variable == "RMSE") %>%
+#  group_by(Variable) %>%
+#    spread(Variable, Value) %>%
+#    kable() %>%
+#    kable_styling()
 ```
 ## Generalizability
 ```{r K-Folds Cross Validation Test}
@@ -1261,8 +1144,10 @@ set.seed(825)
 
 reg.cv <- 
   train(SalePrice ~ ., data = st_drop_geometry(housesKnown) %>% 
-                                dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath.cat, LotSize, Stories.cat, Zoning, Bldg, age, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, Pool, Dock, Patio, floodInsureType, highCatch), 
+                                dplyr::select(SalePrice, ActualSqFt, LotSize, Zoning, Stories.cat, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, monthhousingcost, Patio, foodEstablishments, timeToWork,parkArea, floodInsureType), 
      method = "lm", trControl = fitControl, na.action = na.pass)
+
+summary(reg.cv)
 
 #reg.cv.predict <- 
 #  predict(SalePrice ~ ., data = st_drop_geometry(housesKnown) %>% 
@@ -1276,7 +1161,7 @@ reg.cv <-
 #  24 predictor
 
 #k-fold function online
-kfold.MLR = function(fit,k=10,data=fit$model) {
+kfold.MLR = function(fit,k=10,data=fit$model) {       #AD: I'm not sure what this is for?
   sum.sqerr = rep(0,k)
   sum.abserr = rep(0,k)
   sum.pererr = rep(0,k)
@@ -1303,13 +1188,10 @@ kfold.MLR = function(fit,k=10,data=fit$model) {
 
 #This includes mean and standard deviation MAE. 
 #Do 100 folds and plot your cross-validation MAE as a histogram
-ggplot(reg.cv$MAE, geom="histogram") +  #should this be average error for each fold? not working properly..
+ggplot(reg.cv$resample, aes(x=MAE)) +
+  geom_histogram() +
   plotTheme()
 
-library(lindia)
-gg_reshist(reg.cv)      #try #2
-# specify number of bins
-gg_reshist(reg.cv, bins = 20)
 ```
 ## Do errors cluster?
 ```{r Spatial Lag}
@@ -1330,14 +1212,16 @@ neighborList.test <- knn2nb(knearneigh(coords.test, 5))
 spatialWeights.test <- nb2listw(neighborList.test, style="W")
 
 
-
-#BC: I think this regression is not accurate
-#AD: how come?
-
 ```
 
-```{r morans I}
-################Moran's I##################
+
+```{r 10: MAP of residuals for test set}
+
+#map of your residuals for your test set 
+#AD: not sure what this is
+
+#10.1 Moran's I test
+
 moranTest <- moran.mc(miami.test$SalePrice.Error, 
                       spatialWeights.test, nsim = 999)
 
@@ -1352,17 +1236,8 @@ ggplot(as.data.frame(moranTest$res[c(1:999)]), aes(moranTest$res[c(1:999)])) +
        caption="Public Policy Analytics, Figure x.x") +
   plotTheme()
 
-```
-
-```{r 10: MAP of residuals for test set}
-
-#map of your residuals for your test set
-#AD: not sure waht this is
-
-#Moran's I test
-
-#Plot: spatial lag in errors
-#AD: I'm not super clear on this section
+#10.2 Plot: spatial lag in errors
+  #AD: I'm not super clear on this section
 
 miami.test %>% 
   ggplot(aes(SalePrice.Error, SalePrice)) +       #what's this for?
@@ -1394,9 +1269,9 @@ miami.test %>%
 ## Accounting for neighborhood variance
 ```{r Neighborhood Regression}
 left_join(
-  st_drop_geometry(miami.test.nood) %>%
+  st_drop_geometry(miami.test.nhood) %>%
     group_by(neighborhood) %>%
-    summarize(meanPrice = mean(SalePrice, na.rm = T)),     #AD: should both columns be the same?
+    summarize(meanPrice = mean(SalePrice, na.rm = T)),     
   mutate(miami.test, predict.fe = 
                         predict(lm(SalePrice ~ neighborhood, data = miami.test.nhood), 
                         miami.test)) %>%
@@ -1409,7 +1284,7 @@ left_join(
 
 #Make new neighborhood regression
 reg.nhood <- lm(SalePrice ~ ., data = as.data.frame(miami.training) %>% 
-                                 dplyr::select(neighborhood, SalePrice, LivingSqFt, Bed.cat, Bath.cat, LotSize, Stories.cat, Zoning, Bldg, age, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, Pool, Dock, Patio, floodInsureType, highCatch))
+                                 dplyr::select(neighborhood, SalePrice, ActualSqFt, LotSize, Zoning, Stories.cat, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, monthhousingcost, Patio, foodEstablishments, timeToWork,parkArea, floodInsureType))
 summary(reg.nhood)
 
 
@@ -1421,6 +1296,7 @@ miami.test.nhood <-
          SalePrice.AbsError = abs(SalePrice - SalePrice.Predict), # 491238.7
          SalePrice.APE = (abs(SalePrice - SalePrice.Predict)) / SalePrice.Predict)%>% #0.7109973
   filter(SalePrice < 5000000)
+summary(miami.test.nhood)
 
 #Check accuracy 
 bothRegressions <- 
@@ -1439,10 +1315,9 @@ st_drop_geometry(bothRegressions) %>%
     spread(Variable, meanValue) %>%
     kable()
 # BC: 
-#|Regression           | SalePrice.AbsError| SalePrice.APE|
-#|:--------------------|------------------:|-------------:|
-#|Baseline Regression  |           185887.0|     0.7169534|
-#|Neighborhood Effects |           190606.9|     0.0981914|
+#Regression	SalePrice.AbsError	SalePrice.APE
+#Baseline Regression	366345.6	0.0494198
+#Neighborhood Effects	365363.5	-1.3121554
 
 
 ```
@@ -1469,29 +1344,30 @@ bothRegressions %>%
 #filter by toPredict = 1
 housesPredictions <-                   
   houses %>%
-  mutate(SalePrice.predict = predict(reg.nhood, houses),
-         TeamName = 'Panda')
+  mutate(prediction = predict(reg.cv, houses),
+         team_name = 'Panda')
 
-housesPredictions <- housesPredictions[,c("Folio", "SalePrice.predict", "TeamName")] #AD: what do you think!:)
-#BC: I got this error when running this
-#Problem with `mutate()` input `SalePrice.Predict`.
-#i prediction from a rank-deficient fit may be misleading
-#i Input `SalePrice.Predict` is `predict(reg.nhood, miami.test, TeamName = )`.prediction from a rank-deficient fit may be misleading
-#AD: thats's fine I think, I've seen this warning a lot of times. It worked though!
+predictions <- housesPredictions[,c("Folio", "prediction", "team_name", "toPredict")] %>%
+  st_drop_geometry() %>%
+  filter(toPredict == 1) %>%
+  dplyr::select(-toPredict)
 
-allHouses <- houses %>%    #working on adding back to all houses, not done yet
-  filter(toPredict == 0) %>%
-  st_join(housesPredictions)
+write.csv(predictions, "PANDA.csv")
+
+#AD: "The column names MUST to be "prediction", "Folio", and "team_name"" - piazza
+
+
 ```
 
 ```{r 11: map of predicted values}
 #11 Provide a map of your predicted values for where ‘toPredict’ is both 0 and 1. for all houses
 ggplot() +
-  geom_sf(data = housesPredictions, aes(colour = q5(SalePrice.predict))) +
+  geom_sf(data = housesPredictions, aes(colour = q5(prediction))) +
   scale_fill_manual(values = palette5) +
+  facet_wrap(~toPredict) +
   mapTheme()
 # BC: if it says one map for your predicted values for all houses, maybe it's simply asking for this?
-
+# AD: they said to do facetted plot, so I changed it a bit
 ```
 
 ```{r 12: Using the test set predictions, provide a map of MAPE by neighborhood}
@@ -1519,12 +1395,12 @@ st_drop_geometry(bothRegressions) %>%
 
 scatter_hood <- 
     miami.test.nhood %>%
-    group_by(NAME.y) %>%
-    dplyr::select(NAME.y, SalePrice.APE, SalePrice.Predict)
+    group_by(neighborhood) %>%
+    dplyr::select(neighborhood, SalePrice.APE, SalePrice.Predict)
 
 mean_sca_hd <- 
   scatter_hood %>%
-  group_by(NAME.y) %>%
+  group_by(neighborhood) %>%
   summarise_at(vars("SalePrice.APE", "SalePrice.Predict"), mean)
 
 plot(mean_sca_hd$SalePrice.Predict, mean_sca_hd$SalePrice.APE, main="MAPE by neighborhood as a function of mean price by neighborhood", xlab="mean price by neighborhood", ylab="MAPE by neighborhood")
@@ -1557,7 +1433,7 @@ st_join(bothRegressions, acsRaceIncome) %>%
   summarize(mean.MAPE = scales::percent(mean(SalePrice.APE, na.rm = T))) %>%
   st_drop_geometry() %>%
   spread(raceContext, mean.MAPE) %>%
-  kable(caption = "Test set MAPE by neighborhood racial context")
+  kable(caption = "MAPE by neighborhood racial context")
 
 st_join(bothRegressions, acsRaceIncome) %>% 
   filter(!is.na(incomeContext)) %>%
@@ -1565,15 +1441,17 @@ st_join(bothRegressions, acsRaceIncome) %>%
   summarize(mean.MAPE = scales::percent(mean(SalePrice.APE, na.rm = T))) %>%
   st_drop_geometry() %>%
   spread(incomeContext, mean.MAPE) %>%
-  kable(caption = "Test set MAPE by neighborhood income context")
+  kable(caption = "MAPE by neighborhood income context")
 
+#Test set MAPE by neighborhood racial context
 #Regression	Majority Non-White	Majority White
-#Baseline Regression	-761%	93%
-#Neighborhood Effects	36%	81%
+#Baseline Regression	-44%	35%
+#Neighborhood Effects	-71%	-150%
 
+#Test set MAPE by neighborhood income context
 #Regression	High Income	Low Income
-#Baseline Regression	137%	-282%
-#Neighborhood Effects	-31%	163%
+#Baseline Regression	55%	-10%
+#Neighborhood Effects	-220%	-70%
 ```
 
 # Discussion
