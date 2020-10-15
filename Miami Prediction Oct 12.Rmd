@@ -1197,6 +1197,10 @@ reg.training <-
   lm(SalePrice ~ ., data = st_drop_geometry(miami.training) %>% 
                              dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath.cat, LotSize, Stories.cat, Zoning, age, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, Pool, Dock, Patio, floodInsureType, highCatch))
 summary(reg.training)
+
+ reg3 <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>% 
+             dplyr::select(SalePrice, ActualSqFt, Zoning, Stories.cat, elemCatch, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, pctVacant, pctRenterOcc, monthhousingcost, Patio, Wall, foodEstablishments, metromoverStops, metrorailStops, parkArea, TOD, floodInsureType, schoolDist, distWater))
+ summary(reg3)
 ```
 
 # Results
@@ -1513,6 +1517,19 @@ st_drop_geometry(bothRegressions) %>%
 ```{r 13: Scatterplot of MAPE by neighborhood as a function of mean price by neighborhood}
 #AD: not sure how to do this
 
+scatter_hood <- 
+    miami.test.nhood %>%
+    group_by(NAME.y) %>%
+    dplyr::select(NAME.y, SalePrice.APE, SalePrice.Predict)
+
+mean_sca_hd <- 
+  scatter_hood %>%
+  group_by(NAME.y) %>%
+  summarise_at(vars("SalePrice.APE", "SalePrice.Predict"), mean)
+
+plot(mean_sca_hd$SalePrice.Predict, mean_sca_hd$SalePrice.APE, main="MAPE by neighborhood as a function of mean price by neighborhood", xlab="mean price by neighborhood", ylab="MAPE by neighborhood")
+  
+#https://r-graphics.org/recipe-scatter-labels
 ```
 
 ## Does this model work equally for different demographic groups?
