@@ -1422,9 +1422,7 @@ housesPredictions <-
 #i Input `SalePrice.Predict` is `predict(reg.nhood, miami.test, TeamName = )`.prediction from a rank-deficient fit may be misleading
 #AD: thats's fine I think, I've seen this warning a lot of times. It worked though!
 
-allHouses <- houses %>%    #working on adding back to all houses, not done yet
-  filter(toPredict == 0) %>%
-  st_join(housesPredictions)
+ 
 ```
 
 ```{r Fig 11: map of predicted values}
