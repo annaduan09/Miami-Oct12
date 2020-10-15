@@ -838,8 +838,8 @@ houses <-
  houses <- 
   houses %>%
   mutate(distWater.cat = case_when(
-                  distWater < 0.25  ~ "Near shore",
-                  distWater >= 0.25                    ~ "Not near shore"))
+                  distWater < 1  ~ "Less than 1 Mile",
+                  distWater >= 1                    ~ "More than 1 Mile"))
  
   
  houses <- 
@@ -1064,7 +1064,7 @@ ggplot() +
   mapTheme()
 ```
 
-```{Fig 5: MAP 3 Independent Variables}
+```{r Fig 5: MAP 3 Independent Variables}
 
 #3 maps of 3 of your most interesting independent variables
 
@@ -1088,6 +1088,12 @@ ggplot() +
   scale_fill_manual(values = palette5) +
   mapTheme()
 
+
+#?TOD
+ggplot() + 
+  geom_sf(data = houses, aes(colour = TOD)) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
 
 #SPSqFt
 ggplot() + 
@@ -1136,9 +1142,6 @@ ggplot() +
 
 ```{r Designing Regression}
 
-drop <- c("x","TOD")
-houses = houses[,!(names(houses) %in% drop)] #AD: what is this?
-
 
  cor.test(houses$parkArea, houses$SalePrice, method = "pearson")
 
@@ -1146,14 +1149,15 @@ houses = houses[,!(names(houses) %in% drop)] #AD: what is this?
  #1: random - 0.826 - LETS DO THIS ONE
  #BC: CHECK THIS OUT, SO SURPRISED!!!
  #AD: even higher now!
+ #MATT: MAE cross-validation 
  reg1 <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>% 
-             dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath.cat, LotSize, Stories.cat, Zoning, age, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, Pool, Dock, Patio, floodInsureType, highCatch))
+             dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath.cat, LotSize, Stories.cat, Zoning, age, Bldg, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, Pool, Dock, Patio, floodInsureType, highCatch))
  summary(reg1)
-
+ #what is bldg? Bldg,
 ```
 
 ```{r Train the regression}
-
+#MATT:refine neighborhood data
 #read FL neighborhoods
 #nhoods_fl <- aoi_boundary_HARV <- st_read("E:/Upenn/CPLN508/miami/zillow_nghbrhd_feb17/zillow_nghbrhd_feb17.shp")
 nhoods_fl <- aoi_boundary_HARV <- st_read("/Users/annaduan/Documents/GitHub/Miami-Oct12/Raw\ Data/zillow_nghbrhd_feb17/zillow_nghbrhd_feb17.shp")
@@ -1188,11 +1192,15 @@ miami.training <- housesKnown[inTrain,]
 miami.test <- housesKnown[-inTrain,]  
 
 
-#Training regression
+#Training regression #edit the variables
 reg.training <- 
   lm(SalePrice ~ ., data = st_drop_geometry(miami.training) %>% 
-                             dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath.cat, LotSize, Stories.cat, Zoning, Bldg, age, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, Pool, Dock, Patio, floodInsureType, highCatch))
+                             dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath.cat, LotSize, Stories.cat, Zoning, age, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, Pool, Dock, Patio, floodInsureType, highCatch))
+summary(reg.training)
 
+ reg3 <- lm(SalePrice ~ ., data = st_drop_geometry(houses) %>% 
+             dplyr::select(SalePrice, ActualSqFt, Zoning, Stories.cat, elemCatch, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, pctVacant, pctRenterOcc, monthhousingcost, Patio, Wall, foodEstablishments, metromoverStops, metrorailStops, parkArea, TOD, floodInsureType, schoolDist, distWater))
+ summary(reg3)
 ```
 
 # Results
@@ -1225,10 +1233,25 @@ ggplot(data = miami.test, aes(x = SalePrice.Predict, y = SalePrice.APE)) + geom_
 ```
 
 ```{r Fig 7: TABLE of MAE and MAPE for single test set}
+#AD: not sure how to do this
+length(reg.cv$resample$MAE)
+max(reg.cv$resample$MAE)#949097
+reg.cv$resample[80,]
+min(reg.cv$resample$MAE)#237439.9
+reg.cv$resample[75,]
 
-#How to select one fold?
+stargazer(min(reg.cv$resample$MAE), type="text", digits=1, title="LM of Training Data", out = "Training LM.txt")
 
-
+reg.cv.rs.min <- as.data.frame(reg.cv$resample[75,])
+#stargazer(reg.cv.rs.min, type="text", digits=1, title="LM of Training Data", out = "Training LM.txt")
+library(kableExtra)
+reg.cv.rs.min %>%
+  gather(Variable, Value) %>%
+  #filter(Variable == "MAE" | Variable == "RMSE") %>%
+  group_by(Variable) %>%
+    spread(Variable, Value) %>%
+    kable() %>%
+    kable_styling()
 ```
 ## Generalizability
 ```{r K-Folds Cross Validation Test}
@@ -1241,11 +1264,38 @@ reg.cv <-
                                 dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath.cat, LotSize, Stories.cat, Zoning, Bldg, age, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, Pool, Dock, Patio, floodInsureType, highCatch), 
      method = "lm", trControl = fitControl, na.action = na.pass)
 
+#reg.cv.predict <- 
+#  predict(SalePrice ~ ., data = st_drop_geometry(housesKnown) %>% 
+#                                dplyr::select(SalePrice, LivingSqFt, Bed.cat, Bath.cat, LotSize, Stories.cat, Zoning, #Bldg, age, timeToWork, parkArea, medHHInc, pctVacant, foodEstablishments, metromoverStops, Pool, Dock, Patio, #floodInsureType, highCatch), 
+#     method = "lm", trControl = fitControl, na.action = na.pass)
+
 # reg.cv
 # RMSE      Rsquared   MAE     
 # 423694   0.9554   230440
 #3503 samples
 #  24 predictor
+
+#k-fold function online
+kfold.MLR = function(fit,k=10,data=fit$model) {
+  sum.sqerr = rep(0,k)
+  sum.abserr = rep(0,k)
+  sum.pererr = rep(0,k)
+  y = fit$model[,1]
+  x = fit$model[,-1]
+  n = nrow(data)
+  folds = sample(1:k,nrow(data),replace=T)
+  for (i in 1:k) {
+    fit2 <- lm(formula(fit),data=data[folds!=i,])
+    ypred = predict(fit2,newdata=data[folds==i,])
+    sum.sqerr[i] = sum((y[folds==i]-ypred)^2)
+    sum.abserr[i] = sum(abs(y[folds==i]-ypred))
+    sum.pererr[i] = sum(abs(y[folds==i]-ypred)/y[folds==i])
+  }
+  cv = return(data.frame(RMSEP=sqrt(sum(sum.sqerr)/n),
+                         MAE=sum(sum.abserr)/n,
+             MAPE=(sum(sum.pererr)/n)*100))
+}
+
 
 ```
 
@@ -1253,10 +1303,13 @@ reg.cv <-
 
 #This includes mean and standard deviation MAE. 
 #Do 100 folds and plot your cross-validation MAE as a histogram
-ggplot(reg.cv$resample, aes(x=MAE)) +  #should this be average error for each fold? not working properly..
-  geom_histogram() +
+ggplot(reg.cv$MAE, geom="histogram") +  #should this be average error for each fold? not working properly..
   plotTheme()
- 
+
+library(lindia)
+gg_reshist(reg.cv)      #try #2
+# specify number of bins
+gg_reshist(reg.cv, bins = 20)
 ```
 ## Do errors cluster?
 ```{r Spatial Lag}
@@ -1283,13 +1336,8 @@ spatialWeights.test <- nb2listw(neighborList.test, style="W")
 
 ```
 
-
-```{r 10: MAP of residuals for test set}
-
-#10.1: map of your residuals for your test set
-#AD: not sure what this is
-
-#10.2: Moran's I test
+```{r morans I}
+################Moran's I##################
 moranTest <- moran.mc(miami.test$SalePrice.Error, 
                       spatialWeights.test, nsim = 999)
 
@@ -1304,13 +1352,20 @@ ggplot(as.data.frame(moranTest$res[c(1:999)]), aes(moranTest$res[c(1:999)])) +
        caption="Public Policy Analytics, Figure x.x") +
   plotTheme()
 
+```
 
-#10.3: Plot: spatial lag in errors
+```{r 10: MAP of residuals for test set}
 
-  #AD: I'm not super clear on this section
+#map of your residuals for your test set
+#AD: not sure waht this is
+
+#Moran's I test
+
+#Plot: spatial lag in errors
+#AD: I'm not super clear on this section
 
 miami.test %>% 
-  ggplot(aes(SalePrice.Error, SalePrice)) +       #what's this for? Can you write some notes here so I know how to explain?
+  ggplot(aes(SalePrice.Error, SalePrice)) +       #what's this for?
   geom_point() +
   stat_smooth(aes(SalePrice.Error, SalePrice), 
             method = "lm", se = FALSE, size = 1, colour="#25CB10")+
@@ -1318,7 +1373,7 @@ miami.test %>%
   
 
 miami.test %>%                
-  mutate(lagPriceError = lag.listw(spatialWeights.test, SalePrice.Error)) %>%  #AD: not working for me
+  mutate(lagPriceError = lag.listw(spatialWeights.test, SalePrice.Error)) +  #AD: not working for me
   ggplot(aes(lagPriceError, SalePrice)) +
   geom_point() +
   stat_smooth(aes(lagPriceError, SalePrice), 
@@ -1339,11 +1394,11 @@ miami.test %>%
 ## Accounting for neighborhood variance
 ```{r Neighborhood Regression}
 left_join(
-  st_drop_geometry(miami.test) %>%
+  st_drop_geometry(miami.test.nood) %>%
     group_by(neighborhood) %>%
     summarize(meanPrice = mean(SalePrice, na.rm = T)),     #AD: should both columns be the same?
   mutate(miami.test, predict.fe = 
-                        predict(lm(SalePrice ~ neighborhood, data = miami.test), 
+                        predict(lm(SalePrice ~ neighborhood, data = miami.test.nhood), 
                         miami.test)) %>%
     st_drop_geometry %>%
     group_by(neighborhood) %>%
@@ -1413,24 +1468,33 @@ bothRegressions %>%
 #876 rows 
 #filter by toPredict = 1
 housesPredictions <-                   
-  housesUnknown %>%
-  mutate(SalePrice = predict(reg.nhood, housesUnknown,
-         TeamName = Panda)) #AD: what do you think!:)
+  houses %>%
+  mutate(SalePrice.predict = predict(reg.nhood, houses),
+         TeamName = 'Panda')
+
+housesPredictions <- housesPredictions[,c("Folio", "SalePrice.predict", "TeamName")] #AD: what do you think!:)
 #BC: I got this error when running this
 #Problem with `mutate()` input `SalePrice.Predict`.
 #i prediction from a rank-deficient fit may be misleading
 #i Input `SalePrice.Predict` is `predict(reg.nhood, miami.test, TeamName = )`.prediction from a rank-deficient fit may be misleading
 #AD: thats's fine I think, I've seen this warning a lot of times. It worked though!
 
- 
+allHouses <- houses %>%    #working on adding back to all houses, not done yet
+  filter(toPredict == 0) %>%
+  st_join(housesPredictions)
 ```
 
-```{r Fig 11: map of predicted values}
-#11 Provide a map of your predicted values for where ‘toPredict’ is both 0 and 1.
-# facetted plot: one side with hosues with given SalePRice values, other site with our predicted values
+```{r 11: map of predicted values}
+#11 Provide a map of your predicted values for where ‘toPredict’ is both 0 and 1. for all houses
+ggplot() +
+  geom_sf(data = housesPredictions, aes(colour = q5(SalePrice.predict))) +
+  scale_fill_manual(values = palette5) +
+  mapTheme()
+# BC: if it says one map for your predicted values for all houses, maybe it's simply asking for this?
+
 ```
 
-```{r Fig 12: Using the test set predictions, provide a map of MAPE by neighborhood}
+```{r 12: Using the test set predictions, provide a map of MAPE by neighborhood}
 #Using the test set predictions, provide a map of mean absolute percentage error (MAPE) by neighborhood
 names(bothRegressions)[names(bothRegressions) == "neighborhood"] <- "neighborhood"
 st_drop_geometry(bothRegressions) %>%
@@ -1450,12 +1514,26 @@ st_drop_geometry(bothRegressions) %>%
 
 ```
 
-```{r Fig 13: Scatterplot of MAPE by neighborhood as a function of mean price by neighborhood}
+```{r 13: Scatterplot of MAPE by neighborhood as a function of mean price by neighborhood}
+#AD: not sure how to do this
 
+scatter_hood <- 
+    miami.test.nhood %>%
+    group_by(NAME.y) %>%
+    dplyr::select(NAME.y, SalePrice.APE, SalePrice.Predict)
+
+mean_sca_hd <- 
+  scatter_hood %>%
+  group_by(NAME.y) %>%
+  summarise_at(vars("SalePrice.APE", "SalePrice.Predict"), mean)
+
+plot(mean_sca_hd$SalePrice.Predict, mean_sca_hd$SalePrice.APE, main="MAPE by neighborhood as a function of mean price by neighborhood", xlab="mean price by neighborhood", ylab="MAPE by neighborhood")
+  
+#https://r-graphics.org/recipe-scatter-labels
 ```
 
 ## Does this model work equally for different demographic groups?
-```{r Fig 14: race and income}
+```{r 14: race and income}
 #RACE & INCOME
   #make new layer
 acsRaceIncome <- 
