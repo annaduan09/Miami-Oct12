@@ -838,8 +838,8 @@ houses <-
  houses <- 
   houses %>%
   mutate(distWater.cat = case_when(
-                  distWater < 1  ~ "Less than 1 Mile",
-                  distWater >= 1                    ~ "More than 1 Mile"))
+                  distWater < 0.25  ~ "Near shore",
+                  distWater >= 0.25                    ~ "Not near shore"))
  
   
  houses <- 
@@ -1089,12 +1089,6 @@ ggplot() +
   mapTheme()
 
 
-#TOD
-ggplot() + 
-  geom_sf(data = houses, aes(colour = TOD)) +
-  scale_fill_manual(values = palette5) +
-  mapTheme()
-
 #SPSqFt
 ggplot() + 
   geom_sf(data = houses, aes(colour = q5(SPSqFt))) +
@@ -1231,7 +1225,10 @@ ggplot(data = miami.test, aes(x = SalePrice.Predict, y = SalePrice.APE)) + geom_
 ```
 
 ```{r Fig 7: TABLE of MAE and MAPE for single test set}
-#AD: not sure how to do this
+
+#How to select one fold?
+
+
 ```
 ## Generalizability
 ```{r K-Folds Cross Validation Test}
@@ -1259,11 +1256,7 @@ reg.cv <-
 ggplot(reg.cv$resample, aes(x=MAE)) +  #should this be average error for each fold? not working properly..
   geom_histogram() +
   plotTheme()
-
-library(lindia)
-gg_reshist(reg.cv$finalModel)      #try #2
-# specify number of bins
-gg_reshist(reg.cv$finalModel, bins = 20)
+ 
 ```
 ## Do errors cluster?
 ```{r Spatial Lag}
@@ -1290,8 +1283,13 @@ spatialWeights.test <- nb2listw(neighborList.test, style="W")
 
 ```
 
-```{r morans I}
-################Moran's I##################
+
+```{r 10: MAP of residuals for test set}
+
+#10.1: map of your residuals for your test set
+#AD: not sure what this is
+
+#10.2: Moran's I test
 moranTest <- moran.mc(miami.test$SalePrice.Error, 
                       spatialWeights.test, nsim = 999)
 
@@ -1306,20 +1304,13 @@ ggplot(as.data.frame(moranTest$res[c(1:999)]), aes(moranTest$res[c(1:999)])) +
        caption="Public Policy Analytics, Figure x.x") +
   plotTheme()
 
-```
 
-```{r 10: MAP of residuals for test set}
+#10.3: Plot: spatial lag in errors
 
-#map of your residuals for your test set
-#AD: not sure waht this is
-
-#Moran's I test
-
-#Plot: spatial lag in errors
-#AD: I'm not super clear on this section
+  #AD: I'm not super clear on this section
 
 miami.test %>% 
-  ggplot(aes(SalePrice.Error, SalePrice)) +       #what's this for?
+  ggplot(aes(SalePrice.Error, SalePrice)) +       #what's this for? Can you write some notes here so I know how to explain?
   geom_point() +
   stat_smooth(aes(SalePrice.Error, SalePrice), 
             method = "lm", se = FALSE, size = 1, colour="#25CB10")+
@@ -1436,11 +1427,12 @@ allHouses <- houses %>%    #working on adding back to all houses, not done yet
   st_join(housesPredictions)
 ```
 
-```{r 11: map of predicted values}
+```{r Fig 11: map of predicted values}
 #11 Provide a map of your predicted values for where ‘toPredict’ is both 0 and 1.
+# facetted plot: one side with hosues with given SalePRice values, other site with our predicted values
 ```
 
-```{r 12: Using the test set predictions, provide a map of MAPE by neighborhood}
+```{r Fig 12: Using the test set predictions, provide a map of MAPE by neighborhood}
 #Using the test set predictions, provide a map of mean absolute percentage error (MAPE) by neighborhood
 names(bothRegressions)[names(bothRegressions) == "neighborhood"] <- "neighborhood"
 st_drop_geometry(bothRegressions) %>%
@@ -1460,12 +1452,12 @@ st_drop_geometry(bothRegressions) %>%
 
 ```
 
-```{r 13: Scatterplot of MAPE by neighborhood as a function of mean price by neighborhood}
-#AD: not sure how to do this
+```{r Fig 13: Scatterplot of MAPE by neighborhood as a function of mean price by neighborhood}
+
 ```
 
 ## Does this model work equally for different demographic groups?
-```{r 14: race and income}
+```{r Fig 14: race and income}
 #RACE & INCOME
   #make new layer
 acsRaceIncome <- 
