@@ -76,6 +76,7 @@ plotTheme <- function(base_size = 12) {
 }
 
 palette5 <- c("#c8ddfa", "#8cb5ed", "#5890db",   "#2868bd", "#023578")
+paletteMap <- c("gray90","gray70","gray50","gray30","gray10")
 
 qBr <- function(df, variable, rnd) {
   if (missing(rnd)) {
@@ -114,7 +115,6 @@ nn_function <- function(measureFrom,measureTo,k) {
 For this analysis, we received a dataset of houses and their internal characteristics including number of rooms, living area, and pools. In addition, we gathered open-sourced data from the American Community Survey, Miami Dade County's Open Data Hub, OpenStreetMaps. This includes  census-tract level demographic information and point and polygon layers of amenities including restaurants and parks (Table 1). It is expected that attributes that contribute to quality of life such as proximity to restaurants, park space, and low commuting times correlate positively with sale prices. 
 ```{r Read Data, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 #projected to NAD 1983 StatePlane Florida East FIPS 0901 Feet
-
 
 
 #STUDY AREA
@@ -481,109 +481,6 @@ contaminated <- st_read("https://opendata.arcgis.com/datasets/43750f842b1e451aa0
     st_sf() %>%
     mutate(inMiami = "NO")) %>%
   filter(inMiami == "YES")
-
-
-
-#low income depressed area (county level no need to clip)
- #AD: Are these within our study area? I don't see much overlap and I feel this would result in a lot of NAs
-#low_income_depressed <- st_read("https://opendata.arcgis.com/datasets/40119bfc50274c1da548ec8022e9a7a9_0.geojson") %>%
-#  st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
-#  st_transform('ESRI:102658')
-#low_income_depressed <- rbind(
-#  commercial[miamiBound,] %>%
-#    st_drop_geometry() %>%
-#    left_join(low_income_depressed) %>%
-#    st_sf() %>%
-#    mutate(inMiami = "YES"),
-#  commercial[miamiBound, op = st_disjoint] %>%
-#    st_drop_geometry() %>%
-#    left_join(low_income_depressed) %>%
-#    st_sf() %>%
-#    mutate(inMiami = "NO")) %>%
-#  filter(inMiami == "YES")
-
-#neighborhood_revitalization <- st_read("https://opendata.arcgis.com/datasets/fe6f419e21264158b18eb77be9870d97_0.geojson") #%>%
-#  st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
-#  st_transform('ESRI:102658')
-#neighborhood_revitalization <- rbind(
-#  commercial[miamiBound,] %>%
-#    st_drop_geometry() %>%
-#    left_join(neighborhood_revitalization) %>%
-#    st_sf() %>%
-#    mutate(inMiami = "YES"),
-#  commercial[miamiBound, op = st_disjoint] %>%
-#    st_drop_geometry() %>%
-#    left_join(neighborhood_revitalization) %>%
-#    st_sf() %>%
-#    mutate(inMiami = "NO")) %>%
-#  filter(inMiami == "YES")
-
-#neighborhood stability https://gis-mdc.opendata.arcgis.com/datasets/neighborhood-stabilization-program/data
-#nbh_stability <- st_read("https://opendata.arcgis.com/datasets/5c0822e7c26d437dbc04103ddf05d2fc_0.geojson") %>%
-#  st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
-#  st_transform('ESRI:102658')
-
-#install.packages("rmapshaper")
-#library(rmapshaper)
-
-#nbh_sta <- ms_clip(  #AD: what does this do?
-#  nbh_stability,
-#  clip = NULL,
-#  bbox = c(xmin, ymin, xmax, ymax),
-#  remove_slivers = FALSE,
-#  force_FC = TRUE,
-#  sys = FALSE
-#)
-
-#redevelopment area
-#redev <- st_read("https://opendata.arcgis.com/datasets/38d923b6509547f8bde102e621100b53_0.geojson") %>%
-#  st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
-#  st_transform('ESRI:102658')
-#redev <- rbind(
-#  commercial[miamiBound,] %>%
-#    st_drop_geometry() %>%
-#    left_join(redev) %>%
-#    st_sf() %>%
-#    mutate(inMiami = "YES"),
-#  commercial[miamiBound, op = st_disjoint] %>%
-#    st_drop_geometry() %>%
-#    left_join(redev) %>%
-#    st_sf() %>%
-#    mutate(inMiami = "NO")) %>%
-#  filter(inMiami == "YES")
-
-#1shop
-#BC:try this?
-#AD: worked!
-#shop_m <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/shop_point.geojson") %>%
-#shop_m <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/shop_point.geojson") %>%
-#  st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
-#  st_transform('ESRI:102658')
-#shop_mb <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/shop_point_beach.geojson") %>%
-#shop_mb <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/shop_point_beach.geojson") %>%
-#  st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
-#  st_transform('ESRI:102658')
-#sub_shop_m <- shop_m[, c("full_id", "osm_id", "osm_type", "name", "shop", "addr.city", "addr.street")]
-#sub_shop_mb <- shop_mb[, c("full_id", "osm_id", "osm_type", "name", "shop", "addr.city", "addr.street")]
-#shop <- rbind(sub_shop_m, sub_shop_mb)
-
-#nece_shop <- shop %>% filter(shop %in% c("convenience", "supermarket", "department_store", "bakery", "greengrocer", "General Store"))  
-#poor_shop <- shop %>% filter(shop %in% c("variety_store", "charity", "second_hand"))
-#n_nece_shop <- setdiff(shop, rbind(nece_shop, poor_shop))
-#n_nece_shop <- n_nece_shop[!(n_nece_shop$shop == "" | is.na(n_nece_shop$shop) | n_nece_shop$shop == "vacant"), ]
-
-```
-
-
-```{r Fig 1: TABLE summary stats, message=FALSE, warning=FALSE, include=TRUE}
-#table of summary statistics with variable descriptions, sorted by category
-
-housesSub <- houses %>%
-  dplyr::select("AdjustedSqFt", "LotSize", "Bed", "Bath", "Stories", "commercialProperties", "distWater", "foodEstablishments", "cultureSpots", "busStops", "parkArea", "timeToWork","monthhousingcost","pctVacant")
-
-st_drop_geometry(housesSub)
-stargazer(as.data.frame(housesSub), type="text", digits=1, title="Table 1: Descriptive Statistics for Miami Houses", out = "Miami Data.txt")
-
 ```
 
 ```{r Wrangle Data, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
@@ -618,11 +515,7 @@ stargazer(as.data.frame(housesSub), type="text", digits=1, title="Table 1: Descr
      metroRNN5 = nn_function(st_c(st_centroid(houses)), st_c(metrorail), 5),
      #food/drinks
      foodBevNN1 = nn_function(st_c(st_centroid(houses)), st_c(foodBev), 1),
-     foodBevNN5 = nn_function(st_c(st_centroid(houses)), st_c(foodBev), 5),
-     #daily food shopping place 5250.894
-     neceshopNN1 = nn_function(st_c(st_centroid(houses)), st_c(nece_shop), 1),
-
-     neceshopNN5 = nn_function(st_c(st_centroid(houses)), st_c(nece_shop), 5)
+     foodBevNN5 = nn_function(st_c(st_centroid(houses)), st_c(foodBev), 5)
      ) 
 
 
@@ -882,9 +775,19 @@ houses["441", c("NAME","timeToWork","medHHInc","monthhousingcost","pctVacant","p
 houses %>%
   dplyr::select(-Property.Zip)
 
+```
 
+```{r Table 1: TABLE summary stats, message=FALSE, warning=FALSE, include=TRUE}
+#table of summary statistics with variable descriptions, sorted by category
+
+housesSub <- houses %>%
+  dplyr::select("AdjustedSqFt", "LotSize", "Bed", "Bath", "Stories", "commercialProperties", "age", "distWater", "foodEstablishments", "cultureSpots", "busStops", "parkArea", "timeToWork","monthhousingcost","pctVacant")
+
+st_drop_geometry(housesSub)
+stargazer(as.data.frame(housesSub), type="text", digits=1, title="Table 1: Descriptive Statistics for Miami Houses", out = "Miami Data.txt")
 
 ```
+
 
 
 First, we use a correlation matrix (Figure 1) to get an idea of different variables' correlations with sale price. Below is a list of positive and negative correlations:
@@ -934,6 +837,10 @@ Surprisingly, the share of a census tract that is vacant has a positive correlat
 Bus stops also defy our understanding of cities: according to TOD theory, homes near transportation should be more attractive. However, as Figure 2.4 shows, the number of nearby bus stops correlates negatively with sale price. This may be because lower-income households tend to rely more on public transit.
 	
 ```{r Fig 2.1-2.4: 4 SCATTERPLOT home price correlation, fig.height=5, fig.width=8, message=FALSE, warning=FALSE, include=TRUE}
+housesKnown <- houses %>%    
+  filter(.,toPredict == 0)
+housesUnknown <- houses %>%
+  filter(.,toPredict ==1)
 
 #1: distWater
 ggplot(data = housesKnown, aes(x = distWater, y = SalePrice)) +
@@ -1075,10 +982,6 @@ nhoods <- nhoods %>%
 houses <- houses %>% st_join(., nhoods, join = st_within)
 
 #Separate test/train sets
-housesKnown <- houses %>%    
-  filter(.,toPredict == 0)
-housesUnknown <- houses %>%
-  filter(.,toPredict ==1)
 
 inTrain <- createDataPartition(
               y = paste(housesKnown$Zoning, housesKnown$floodInsureType, housesKnown$neighborhood),
@@ -1135,6 +1038,7 @@ In addition to accuracy, generalizability is important for our model to be effec
 We see in Table 3 that Fold75, one of the 100 partitioned segments of our test data, has an adjusted R-squared of 0.78 and a mean average error of $350,348.9. While the R^2 is high, the error is more than half of the average predicted price across all folds. These results are similar to the results for our training, which suggests strong generalizability across groups.
 
 ```{r Table 3: TABLE of MAE and MAPE for single k- fold test set, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+
 #K Folds test
 fitControl <- trainControl(method = "cv", number = 100)
 set.seed(825)
