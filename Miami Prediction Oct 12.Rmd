@@ -1075,7 +1075,7 @@ length(reg.cv$resample$MAE)
 min(reg.cv$resample$MAE)#237439.9
 reg.cv$resample[75,]  #AD: we also need standard deviation and MAPE
 
-reg.cv.rs.min %>%
+reg.cv.rs.min %>%                     #AD: knitting stops here because it can't find where this was made
   gather(Variable, Value) %>%
   #filter(Variable == "MAE" | Variable == "RMSE") %>%
   group_by(Variable) %>%
