@@ -579,7 +579,7 @@ contaminated <- st_read("https://opendata.arcgis.com/datasets/43750f842b1e451aa0
 #table of summary statistics with variable descriptions, sorted by category
 
 housesSub <- houses %>%
-  dplyr::select("AdjustedSqFt", "LotSize", "Bed", "Bath", "Stories", "age", "commercialProperties", "distWater", "foodEstablishments", "cultureSpots", "busStops", "parkArea", "timeToWork","monthhousingcost","pctVacant")
+  dplyr::select("AdjustedSqFt", "LotSize", "Bed", "Bath", "Stories", "commercialProperties", "distWater", "foodEstablishments", "cultureSpots", "busStops", "parkArea", "timeToWork","monthhousingcost","pctVacant")
 
 st_drop_geometry(housesSub)
 stargazer(as.data.frame(housesSub), type="text", digits=1, title="Descriptive Statistics for Miami Houses", out = "Miami Data.txt")

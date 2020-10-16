@@ -1,5 +1,5 @@
 
-LM of Training Data
+Table 2: LM of Training Data
 =====================================================================
                                               Dependent variable:    
                                           ---------------------------

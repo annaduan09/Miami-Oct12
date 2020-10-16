@@ -1,5 +1,5 @@
 
-Descriptive Statistics for Miami Houses
+Table 1: Descriptive Statistics for Miami Houses
 =================================================================================
 Statistic              N     Mean    St. Dev.   Min  Pctl(25) Pctl(75)     Max   
 ---------------------------------------------------------------------------------
