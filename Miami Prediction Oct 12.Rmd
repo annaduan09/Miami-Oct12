@@ -118,8 +118,8 @@ For this analysis, we received a dataset of houses and their internal characteri
 
 
 #STUDY AREA
-#miamiBound <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Municipal_Boundary.geojson") %>%
-miamiBound <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Municipal_Boundary.geojson") %>%
+miamiBound <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Municipal_Boundary.geojson") %>%
+#miamiBound <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Municipal_Boundary.geojson") %>%
   filter(NAME == "MIAMI BEACH" | NAME == "MIAMI") %>%
   st_union() %>%
   st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326, agr = "constant") %>%
@@ -128,16 +128,16 @@ miamiBound <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\
 
 
 #STUDY AREA OSM (not projected so that it works)
-#miamiBoundOSM <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Municipal_Boundary.geojson") %>%
-miamiBoundOSM <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Municipal_Boundary.geojson") %>%
+miamiBoundOSM <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/Municipal_Boundary.geojson") %>%
+#miamiBoundOSM <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/Municipal_Boundary.geojson") %>%
   filter(NAME == "MIAMI BEACH" | NAME == "MIAMI") %>%
   st_union()
 
 
 
 #HOUSE DATA
-#houses <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/studentsData.geojson") %>%
-houses <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/studentsData.geojson") %>%
+houses <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/studentsData.geojson") %>%
+#houses <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/studentsData.geojson") %>%
   st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658') %>%
   st_centroid()
@@ -146,8 +146,8 @@ houses <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Dat
 
 
 #HOUSE DATA OSM (Not projected)
-#housesOSM <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/studentsData.geojson")
-housesOSM <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/studentsData.geojson")
+housesOSM <- st_read("E:/Upenn/CPLN508/miami/2_Miami-Prediction/Raw Data/studentsData.geojson")
+#housesOSM <- st_read("/Users/annaduan/Documents/GitHub/2_Miami\ Prediction/Raw\ Data/studentsData.geojson")
 
 
 
@@ -717,9 +717,6 @@ houses <-
                   parkArea >= 320000              ~ "More than 320,000 SqFt"))
 
 
- qplot(houses$parkArea, geom="histogram") +
-   plotTheme()
-
  #OTHER HOUSE FEATURES
 houses <- houses %>%
   mutate(Pool = ifelse(str_detect(XF1, "Pool") | str_detect(XF2, "Pool") | str_detect(XF3, "Pool") | str_detect(XF1, "Whirlpool") | str_detect(XF2, "Whirlpool") | str_detect(XF3, "Whirlpool") | str_detect(XF1, "Jacuzzi") | str_detect(XF2, "Jacuzzi") | str_detect(XF3, "Jacuzzi"), "Pool", "No Pool"),
@@ -775,16 +772,16 @@ houses["441", c("NAME","timeToWork","medHHInc","monthhousingcost","pctVacant","p
 houses %>%
   dplyr::select(-Property.Zip)
 
+housesSub <- houses %>%
+  dplyr::select("AdjustedSqFt", "LotSize", "Bed", "Bath", "Stories", "commercialProperties", "age", "distWater", "foodEstablishments", "cultureSpots", "busStops", "parkArea", "timeToWork","monthhousingcost","pctVacant")
+
 ```
 
 ```{r Table 1: TABLE summary stats, message=FALSE, warning=FALSE, include=TRUE}
 #table of summary statistics with variable descriptions, sorted by category
 
-housesSub <- houses %>%
-  dplyr::select("AdjustedSqFt", "LotSize", "Bed", "Bath", "Stories", "commercialProperties", "age", "distWater", "foodEstablishments", "cultureSpots", "busStops", "parkArea", "timeToWork","monthhousingcost","pctVacant")
-
 st_drop_geometry(housesSub)
-stargazer(as.data.frame(housesSub), type="text", digits=1, title="Table 1: Descriptive Statistics for Miami Houses", out = "Miami Data.txt")
+stargazer(as.data.frame(housesSub), type="html", digits=1, title="Table 1: Descriptive Statistics for Miami Houses", out = "Miami Data.txt")
 
 ```
 
@@ -845,28 +842,28 @@ housesUnknown <- houses %>%
 #1: distWater
 ggplot(data = housesKnown, aes(x = distWater, y = SalePrice)) +
   geom_point(size=2, shape=20)  +
-  labs(title = "Figure 2.1: Distance to Shoreline and Sale Price", subtitle = "Miami and Miami Beach, FL") +
+  labs(title = "Figure 2.1: Distance to Shoreline and Sale Price", subtitle = "Miami and Miami Beach, FL", x="Distance to water (mile)", y="Sale price ($)") +
   geom_smooth(method = "lm", se=F, colour = "green") +
   plotTheme()
 
 #2: parkArea
 ggplot(data = housesKnown, aes(x = parkArea, y = SalePrice)) +
   geom_point(size=2, shape=20) +
-  labs(title = "Figure 2.2: Nearby Park Space and Sale Price", subtitle = "Miami and Miami Beach, FL") +
+  labs(title = "Figure 2.2: Nearby Park Space and Sale Price", subtitle = "Miami and Miami Beach, FL", x="Area of park (squared mile)", y="Sale price ($)") +
   geom_smooth(method = "lm", se=F, colour = "green") +
     plotTheme()
 
 #3: vacant
 ggplot(data = housesKnown, aes(x = pctVacant, y = SalePrice)) +
   geom_point(size=2, shape=20) +
- labs(title = "Figure 2.3: Share of Vacant Properties and Sale Price", subtitle = "Miami and Miami Beach, FL") +
+ labs(title = "Figure 2.3: Share of Vacant Properties and Sale Price", subtitle = "Miami and Miami Beach, FL", x="Vacant rate (%)", y="Sale price ($)") +
   geom_smooth(method = "lm", se=F, colour = "green") +
     plotTheme()
 
 #4: bus stops
 ggplot(data = housesKnown, aes(x = busStops, y = SalePrice)) +
   geom_point(size=2, shape=20) +
- labs(title = "Figure 2.4: Bus Stops and Sale Price", subtitle = "Miami and Miami Beach, FL") +
+ labs(title = "Figure 2.4: Bus Stops and Sale Price", subtitle = "Miami and Miami Beach, FL", x="Number of bus stops", y="Sale price ($)") +
   geom_smooth(method = "lm", se=F, colour = "green") +
     plotTheme()
 
@@ -884,10 +881,10 @@ water <- st_read("https://opendata.arcgis.com/datasets/bf9de3192c9c4e458d1453f6d
   st_intersection(.,miamiBound)
 
 ggplot() +
-  geom_sf(data = acs, fill = "gray80", colour = "white") +
+  geom_sf(data = acs, fill = "gray90", colour = "white") +
   geom_sf(data = water, fill = "light blue", colour = "light blue") +
   geom_sf(data = housesKnown, aes(colour = q5(SalePrice))) +
-  scale_colour_manual(values = paletteMap) +
+  scale_colour_manual(values = palette5) +
   labs(title = "Figure 3: Home Sale Price", subtitle = "Miami and Miami Beach, FL") +
   mapTheme()
 ```
@@ -965,8 +962,8 @@ Now knowing that attractive amenities, high income households, large houses, and
 Next, to test this model, we used houses with observed sale prices to create a training set for training our model, and a test set for testing it. 
 ```{r Train the regression, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 #read FL neighborhoods
-#nhoods_fl <- aoi_boundary_HARV <- st_read("E:/Upenn/CPLN508/miami/zillow_nghbrhd_feb17/zillow_nghbrhd_feb17.shp")
-nhoods_fl <- aoi_boundary_HARV <- st_read("/Users/annaduan/Documents/GitHub/Miami-Oct12/Raw\ Data/zillow_nghbrhd_feb17/zillow_nghbrhd_feb17.shp")
+nhoods_fl <- aoi_boundary_HARV <- st_read("E:/Upenn/CPLN508/miami/zillow_nghbrhd_feb17/zillow_nghbrhd_feb17.shp")
+#nhoods_fl <- aoi_boundary_HARV <- st_read("/Users/annaduan/Documents/GitHub/Miami-Oct12/Raw\ Data/zillow_nghbrhd_feb17/zillow_nghbrhd_feb17.shp")
 nhoods_mb <- subset(nhoods_fl, CITY == "MIAMI BEACH")%>%
   st_as_sf(coords = c("LON", "LAT"), crs = 4326, agr = "constant") %>%
   st_transform('ESRI:102658')
@@ -979,7 +976,7 @@ nhoods <- rbind(nhoods_mb, nhoods_m)
 nhoods <- nhoods %>%
   dplyr::select(NAME) %>%
   rename(neighborhood = NAME)
-houses <- houses %>% st_join(., nhoods, join = st_within)
+houses_hood <- houses %>% st_join(., nhoods, join = st_within)
 
 #Separate test/train sets
 
@@ -1000,7 +997,7 @@ reg.training <-
 The results of the regression model on the training set are presented in Table 2. Overall, the R-squared value of 0.9 means our variables explain most of the variation in sale price. The low p values also indicate a high level of confidence.
 ```{r Table 2: TABLE Training Set lm, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 #polished table of  (training set) lm summary results (coefficients, R2 etc)
-stargazer(reg.training, type="text", digits=1, title="Table 2: LM of Training Data", out = "Training LM.txt")
+stargazer(reg.training, type="html", digits=1, title="Table 2: LM of Training Data", out = "Training LM.txt")
 ```
 
 Next, we test the model on our test set to see its effectiveness on new data. Overall, it is relatively accurate: the average percentage error is 7.1%. However, the mean absolute error is $ 351,281, which is concerning as the average price in the test set is $ 689,606. This may be because our model is less accurate for expensive houses, as the absolute errors for them is higher at a given percentage error. Indeed, in Figure 5.1 and 5.2, absolute error is higher for homes with high observed prices, but  percent error is consistently low, at less than 10%.
@@ -1022,12 +1019,12 @@ mean(miami.test$SalePrice.Predict, na.rm = T)#[1] 770165.4
 
 ggplot(data = miami.test) +
   geom_point(aes(x = SalePrice, y = SalePrice.AbsError)) +
-  labs(title = "Figure 5.1: Observed Sale Price and Absolute Error") +
+  labs(title = "Figure 5.1: Observed Sale Price and Absolute Error", x="Sale price ($)", y="Absolute Error ($)") +
   plotTheme()
 
 ggplot(data = miami.test) +
   geom_point(aes(x = SalePrice, y = SalePrice.APE)) +
-  labs(title = "Figure 5.2: Observed Sale Price and Absolute Percent Error") +
+  labs(title = "Figure 5.2: Observed Sale Price and Absolute Percent Error", x="Sale price ($)", y="APE (%)") +
   plotTheme()
                                      
 ```
@@ -1048,47 +1045,56 @@ reg.cv <-
                                 dplyr::select(SalePrice, ActualSqFt, LotSize, Zoning, Stories.cat, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, pctVacant, pctRenterOcc, monthhousingcost, Patio, foodEstablishments, timeToWork, metromoverStops, metrorailStops, parkArea, floodInsureType), 
      method = "lm", trControl = fitControl, na.action = na.pass)
 
+reg.cv.known <-
+  housesKnown %>%
+  mutate(Regression = "Baseline Regression",
+         SalePrice.Predict = predict(reg.cv, housesKnown), #751571.5
+         SalePrice.Error = SalePrice.Predict - SalePrice, #60608.35
+         SalePrice.AbsError = abs(SalePrice.Predict - SalePrice), #363363
+         SalePrice.APE = SalePrice.AbsError / SalePrice) %>% #0.05589877  #corrected 
+  filter(SalePrice < 5000000) 
 
-#k-fold function online
-kfold.MLR = function(fit,k=10,data=fit$model) {    
-  sum.sqerr = rep(0,k)
-  sum.abserr = rep(0,k)
-  sum.pererr = rep(0,k)
-  y = fit$model[,1]
-  x = fit$model[,-1]
-  n = nrow(data)
-  folds = sample(1:k,nrow(data),replace=T)
-  for (i in 1:k) {
-    fit2 <- lm(formula(fit),data=data[folds!=i,])
-    ypred = predict(fit2,newdata=data[folds==i,])
-    sum.sqerr[i] = sum((y[folds==i]-ypred)^2)
-    sum.abserr[i] = sum(abs(y[folds==i]-ypred))
-    sum.pererr[i] = sum(abs(y[folds==i]-ypred)/y[folds==i])
-  }
-  cv = return(data.frame(RMSEP=sqrt(sum(sum.sqerr)/n),
-                         MAE=sum(sum.abserr)/n,
-             MAPE=(sum(sum.pererr)/n)*100))
+fold75 <- reg.cv$control$indexOut$Resample075
+
+reg75 <- reg.cv.known[fold75,c("SalePrice", "SalePrice.Predict")]
+
+reg75.test <-
+  reg75 %>%
+  mutate(SalePrice.Error = SalePrice.Predict - SalePrice, 
+         SalePrice.AbsError = abs(SalePrice.Predict - SalePrice), 
+         SalePrice.APE = SalePrice.AbsError / SalePrice) %>% 
+  filter(SalePrice < 5000000) 
+
+reg.cv.rs.min <- reg.cv$resample[75,]
+reg.cv.rs.min$MAPE <- mean(reg75.test$SalePrice.APE)
+
+round_df <- function(x, digits) {
+    # round all numeric variables
+    # x: data frame 
+    # digits: number of digits to round
+    numeric_columns <- sapply(x, mode) == 'numeric'
+    x[numeric_columns] <-  round(x[numeric_columns], digits)
+    x
 }
-
+reg.cv.rs.min <- round_df(reg.cv.rs.min, 2)
 #Table of MAE and MAPE
-length(reg.cv$resample$MAE)
-min(reg.cv$resample$MAE)#237439.9
-reg.cv$resample[75,]  #AD: we also need standard deviation and MAPE
+library(kableExtra)
 
-reg.cv.rs.min %>%                     #AD: knitting stops here because it can't find where this was made
+reg.cv.rs.min %>%            
   gather(Variable, Value) %>%
   #filter(Variable == "MAE" | Variable == "RMSE") %>%
   group_by(Variable) %>%
     spread(Variable, Value) %>%
     kable(caption = "Table 3: Regression Results of One Test Set") %>%
-   kable_styling()  
+    kable_classic(full_width = F, html_font = "Cambria")
 ```
 
 For more context, Figure 6.1 shows that most test sets have errors around $400,000, but that a few outliers skew the average error upward. If the model is generalizable, it should have a clustered distribution of errors. As this is not the case, it appears that the model is not actually predicting consistently across groups of houses.
 ```{r Fig 6.1: HISTOGRAM results of cross-validation tests, fig.height=5, fig.width=8, message=FALSE, warning=FALSE, include=TRUE}
+
 ggplot(reg.cv$resample, aes(x=MAE)) +
   geom_histogram() +
-  labs(title = "Figure 6.1: Mean Average Error in Cross Validation Tests") +
+  labs(title = "Figure 6.1: Mean Average Error in Cross Validation Tests", X="MAE ($)", y="number of test sets") +
   plotTheme()
 
 ```
@@ -1105,7 +1111,7 @@ neighborList <- knn2nb(knearneigh(coords, 5)) #5 nearest neighborhoods
 
 spatialWeights <- nb2listw(neighborList, style="W") #not sure what is W here
 housesKnown$lagPrice <- lag.listw(spatialWeights, housesKnown$SalePrice)
-plot(housesKnown$SalePrice, housesKnown$lagPrice)
+plot(housesKnown$SalePrice, housesKnown$lagPrice, xlab="Sale Price ($)", ylab="Spatial Lag Price ($)", main="Figure 6.2: The Spatial Lag of Housing Price")
 
 coords.test <-  st_coordinates(miami.test)
 neighborList.test <- knn2nb(knearneigh(coords.test, 5))
@@ -1145,7 +1151,7 @@ miami.test %>%
   geom_point() +
   stat_smooth(aes(lagPriceError, SalePrice), 
              method = "lm", se = FALSE, size = 1, colour="#FA7800")+
-  labs(title = "Figure 8.1: Spatial Lag of Price Errors") +
+  labs(title = "Figure 8.1: Spatial Lag of Price Errors", x="Lag price error ($)", y="Sale price ($)") +
   plotTheme() + theme(plot.title = element_text(size = 18, colour = "black")) 
 
 ```
@@ -1171,30 +1177,39 @@ ggplot(as.data.frame(moranTest$res[c(1:999)]), aes(moranTest$res[c(1:999)])) +
 ## Accounting for neighborhood variance
 We now add neighborhood as a feature in our model to account for the differences in sale price across neighborhoods. Table 4 tells us that when we account for neighborhood effects, we actually slightly increase the absolute error but we decrease the absolute percentage error. This may mean that the neighborhood model works best for lower priced homes, and that it increased the error in expensive ones. It also tells us that our Baseline model already accounted for spatial disparities through our use of open data features.
 ```{r Table 4: Neighborhood Regression, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+housesKnown_hood <- housesKnown %>% st_join(., nhoods, join = st_within)
+inTrain_hood <- createDataPartition(
+              y = paste(housesKnown$Zoning, housesKnown$floodInsureType, housesKnown$neighborhood),
+              p = .60, list = FALSE)
+miami.training_h <- housesKnown[inTrain_hood,]
+miami.test_h <- housesKnown[-inTrain_hood,] 
+miami.training_h <- miami.training_h %>% st_join(., nhoods, join = st_within)
+miami.test_h <- miami.test_h %>% st_join(., nhoods, join = st_within)
 
 #Make new neighborhood regression
-reg.nhood <- lm(SalePrice ~ ., data = as.data.frame(miami.training) %>% 
+reg.nhood <- lm(SalePrice ~ ., data = as.data.frame(miami.training_h) %>% 
                                  dplyr::select(neighborhood, SalePrice, ActualSqFt, LotSize, Zoning, Stories.cat, Bath.cat, Pool, medHHInc, Dock, Bed.cat, middleCatch, age, pctVacant, pctRenterOcc, monthhousingcost, Patio, foodEstablishments, timeToWork, metromoverStops, metrorailStops, parkArea, floodInsureType))
 summary(reg.nhood)
 
 #Outcomes
 miami.test.nhood <-
-  miami.test %>%
+  miami.test_h %>%
   mutate(Regression = "Neighborhood Effects",
-         SalePrice.Predict = predict(reg.nhood, miami.test), #613237.3
+         SalePrice.Predict = predict(reg.nhood, miami.test_h), #613237.3
          SalePrice.Error = SalePrice - SalePrice.Predict, # -108442.4      
          SalePrice.AbsError = abs(SalePrice - SalePrice.Predict), # 491238.7
          SalePrice.APE = (abs(SalePrice - SalePrice.Predict)) / SalePrice)%>% #0.7109973
   filter(SalePrice < 5000000)
 summary(miami.test.nhood)
 
+miami.test <- miami.test %>% st_join(., nhoods, join = st_within)
 #Check accuracy
 bothRegressions <-
   rbind(
     dplyr::select(miami.test, starts_with("SalePrice"), Regression, neighborhood) %>%
       mutate(lagPriceError = lag.listw(spatialWeights.test, SalePrice.Error)),
     dplyr::select(miami.test.nhood, starts_with("SalePrice"), Regression, neighborhood) %>%
-      mutate(lagPriceError = lag.listw(spatialWeights.test, SalePrice.Error)))   
+    mutate(lagPriceError = lag.listw(spatialWeights.test, SalePrice.Error)))   
 
 st_drop_geometry(bothRegressions) %>%
   gather(Variable, Value, -Regression, -neighborhood) %>%
