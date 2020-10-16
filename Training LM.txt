@@ -5,206 +5,206 @@ Table 2: LM of Training Data
                                           ---------------------------
                                                    SalePrice         
 ---------------------------------------------------------------------
-ActualSqFt                                         803.2***          
-                                                    (29.4)           
+ActualSqFt                                         771.3***          
+                                                    (27.8)           
                                                                      
-LotSize                                             18.8**           
-                                                     (7.8)           
+LotSize                                              10.6            
+                                                     (7.5)           
                                                                      
-Zoning0104 - SINGLE FAM - ANCILIARY UNIT           102,227.9         
-                                                  (88,242.2)         
+Zoning0104 - SINGLE FAM - ANCILIARY UNIT           34,462.6          
+                                                  (82,043.0)         
                                                                      
-Zoning0800 - SGL FAMILY - 1701-1900 SQ          1,941,060.0***       
-                                                  (150,826.5)        
+Zoning0800 - SGL FAMILY - 1701-1900 SQ          1,970,980.0***       
+                                                  (140,993.8)        
                                                                      
-Zoning2100 - ESTATES - 15000 SQFT LOT           4,045,446.0***       
-                                                  (305,653.2)        
+Zoning2100 - ESTATES - 15000 SQFT LOT           5,850,292.0***       
+                                                  (292,803.7)        
                                                                      
-Zoning2200 - ESTATES - 25000 SQFT LOT           3,079,645.0***       
-                                                  (423,836.1)        
+Zoning2200 - ESTATES - 25000 SQFT LOT           4,208,657.0***       
+                                                  (411,856.4)        
                                                                      
-Zoning2800 - TOWNHOUSE                             13,571.6          
-                                                  (415,527.4)        
+Zoning2800 - TOWNHOUSE                             -71,696.0         
+                                                  (395,973.7)        
                                                                      
-Zoning3900 - MULTI-FAMILY - 38-62 U/A              134,725.0         
-                                                  (170,415.4)        
+Zoning3900 - MULTI-FAMILY - 38-62 U/A               4,056.2          
+                                                  (157,268.1)        
                                                                      
-Zoning3901 - GENERAL URBAN 36 U/A LIMITED          219,434.4         
-                                                  (208,962.9)        
+Zoning3901 - GENERAL URBAN 36 U/A LIMITED          83,572.8          
+                                                  (190,131.8)        
                                                                      
 Zoning4600 - MULTI-FAMILY - 5 STORY                                  
-                                                  (267,319.6)        
+                                                  (256,816.5)        
                                                                      
 Zoning4601 - MULTI-FAMILY - 8 STORY                                  
-                                                  (614,660.2)        
+                                                  (586,566.8)        
                                                                      
-Zoning4801 - RESIDENTIAL-LIMITED RETAI             256,667.2         
-                                                  (428,775.6)        
+Zoning4801 - RESIDENTIAL-LIMITED RETAI             201,823.6         
+                                                  (410,347.8)        
                                                                      
-Zoning5700 - DUPLEXES - GENERAL                    127,477.9         
-                                                  (78,094.0)         
+Zoning5700 - DUPLEXES - GENERAL                    62,736.2          
+                                                  (73,779.2)         
                                                                      
-Zoning6100 - COMMERCIAL - NEIGHBORHOOD            -146,864.9         
-                                                  (326,475.8)        
+Zoning6100 - COMMERCIAL - NEIGHBORHOOD             -13,504.7         
+                                                  (312,607.8)        
                                                                      
-Zoning6101 - CEN-PEDESTRIAN ORIENTATIO             73,731.9          
-                                                  (324,978.5)        
+Zoning6101 - CEN-PEDESTRIAN ORIENTATIO             111,520.4         
+                                                  (291,654.2)        
                                                                      
-Zoning6106 - RESIDENTIAL-LIBERAL RETAI            1,016,888.0        
-                                                  (625,952.1)        
+Zoning6106 - RESIDENTIAL-LIBERAL RETAI             933,202.3         
+                                                  (597,857.6)        
                                                                      
-Zoning6107 - RESIDENTIAL-MEDIUM RETAIL             176,168.4         
-                                                  (260,545.5)        
+Zoning6107 - RESIDENTIAL-MEDIUM RETAIL             292,749.5         
+                                                  (249,192.5)        
                                                                      
-Zoning6110 - COMM/RESIDENTIAL-DESIGN D             209,457.9         
-                                                  (453,514.4)        
+Zoning6110 - COMM/RESIDENTIAL-DESIGN D             63,711.3          
+                                                  (432,792.0)        
                                                                      
-Zoning6402 - URBAN CORE 24 STORY/7FLR             1,146,204.0        
-                                                  (860,057.7)        
+Zoning6402 - URBAN CORE 24 STORY/7FLR             1,033,625.0        
+                                                  (823,191.0)        
                                                                      
-Zoning7000 - INDUSTRIAL - GENERAL                  113,579.8         
-                                                  (848,147.7)        
+Zoning7000 - INDUSTRIAL - GENERAL                  97,928.6          
+                                                  (812,762.5)        
                                                                      
-Zoning7700 - INDUSTRIAL - RESTRICTED               74,633.7          
-                                                  (443,888.1)        
+Zoning7700 - INDUSTRIAL - RESTRICTED               152,713.2         
+                                                  (422,080.0)        
                                                                      
-Stories.cat3+ Stories                           2,507,571.0***       
-                                                  (241,319.7)        
+Stories.cat3+ Stories                           2,088,263.0***       
+                                                  (217,059.8)        
                                                                      
-Stories.catUp to 1 Stories                       275,358.8***        
-                                                  (77,266.3)         
+Stories.catUp to 1 Stories                       261,822.7***        
+                                                  (72,290.1)         
                                                                      
-Bath.cat3+ Bathrooms                             -282,580.3***       
-                                                  (81,757.1)         
+Bath.cat3+ Bathrooms                             -220,931.0***       
+                                                  (77,895.4)         
                                                                      
-Bath.catUp to 1 Bathroom                         238,517.2***        
-                                                  (64,737.2)         
+Bath.catUp to 1 Bathroom                         222,584.1***        
+                                                  (61,528.4)         
                                                                      
-PoolPool                                           -73,449.0         
-                                                  (71,057.1)         
+PoolPool                                           -86,231.2         
+                                                  (67,335.9)         
                                                                      
-medHHInc                                              0.6            
+medHHInc                                              0.1            
                                                      (1.0)           
                                                                      
-DockNo Dock                                      -336,222.8***       
-                                                  (129,649.3)        
+DockNo Dock                                       -141,480.1         
+                                                  (124,678.3)        
                                                                      
-Bed.cat4+ Beds                                   -169,287.1**        
-                                                  (74,169.2)         
+Bed.cat4+ Beds                                   -144,637.1**        
+                                                  (69,183.3)         
                                                                      
-Bed.catUp to 2 Beds                                90,798.5          
-                                                  (61,506.9)         
+Bed.catUp to 2 Beds                                93,160.1          
+                                                  (58,229.9)         
                                                                      
-middleCatchde Diego, Jose Middle                   -27,263.8         
-                                                  (150,133.0)        
+middleCatchde Diego, Jose Middle                   131,011.1         
+                                                  (144,774.1)        
                                                                      
-middleCatchJones-Ayers, Georgia Middle             15,841.8          
-                                                  (141,709.6)        
+middleCatchJones-Ayers, Georgia Middle             62,603.5          
+                                                  (136,719.1)        
                                                                      
-middleCatchKinloch Park Middle                       984.5           
-                                                  (178,840.4)        
+middleCatchKinloch Park Middle                     67,105.0          
+                                                  (166,946.2)        
                                                                      
-middleCatchMann, Horace Middle                     -25,501.0         
-                                                  (161,086.5)        
+middleCatchMann, Horace Middle                      9,322.5          
+                                                  (152,822.6)        
                                                                      
-middleCatchNautilus Middle                         288,538.6         
-                                                  (298,429.1)        
+middleCatchNautilus Middle                         326,043.3         
+                                                  (275,811.3)        
                                                                      
-middleCatchother                                   24,706.3          
-                                                  (133,471.3)        
+middleCatchother                                   109,494.5         
+                                                  (126,123.5)        
                                                                      
-middleCatchPonce de Leon Middle                    178,741.4         
-                                                  (141,025.1)        
+middleCatchPonce de Leon Middle                   234,080.6*         
+                                                  (132,763.9)        
                                                                      
-middleCatchShenandoah Middle                       97,076.0          
-                                                  (124,443.4)        
+middleCatchShenandoah Middle                       127,042.8         
+                                                  (114,449.6)        
                                                                      
-age                                               -3,584.6***        
-                                                   (1,167.4)         
+age                                               -3,040.6***        
+                                                   (1,124.2)         
                                                                      
-pctVacant                                        -927,845.9**        
-                                                  (430,952.4)        
+pctVacant                                        -817,583.6**        
+                                                  (406,830.8)        
                                                                      
-pctRenterOcc                                       53,669.0          
-                                                  (238,927.2)        
+pctRenterOcc                                       80,139.5          
+                                                  (217,573.7)        
                                                                      
-monthhousingcost                                     -32.2           
-                                                    (87.9)           
+monthhousingcost                                     -32.8           
+                                                    (82.3)           
                                                                      
-PatioPatio                                         -49,810.3         
-                                                  (47,324.8)         
+PatioPatio                                         -52,830.0         
+                                                  (44,811.4)         
                                                                      
-foodEstablishments                                10,627.9***        
-                                                   (3,752.6)         
+foodEstablishments                                 5,958.1*          
+                                                   (3,533.4)         
                                                                      
-timeToWork                                            4.9            
-                                                    (57.6)           
+timeToWork                                           -14.5           
+                                                    (53.8)           
                                                                      
-metromoverStops                                    11,296.3*         
-                                                   (6,700.4)         
+metromoverStops                                     9,158.3          
+                                                   (6,331.7)         
                                                                      
-metrorailStops                                     -17,976.1         
-                                                  (26,586.7)         
+metrorailStops                                     -16,009.4         
+                                                  (24,195.9)         
                                                                      
 parkArea                                            -0.2***          
-                                                     (0.1)           
+                                                    (0.05)           
                                                                      
-floodInsureType0294                                -41,420.4         
-                                                  (125,285.2)        
+floodInsureType0294                                -22,911.3         
+                                                  (119,455.8)        
                                                                      
-floodInsureType0304                                78,860.6          
-                                                  (206,392.4)        
+floodInsureType0304                                -1,673.2          
+                                                  (192,481.7)        
                                                                      
-floodInsureType0307                               -135,304.4         
-                                                  (316,176.0)        
+floodInsureType0307                               -166,815.8         
+                                                  (287,740.8)        
                                                                      
-floodInsureType0308                                223,351.2         
-                                                  (244,763.5)        
+floodInsureType0308                                273,830.5         
+                                                  (225,860.9)        
                                                                      
-floodInsureType0309                                482,951.2         
-                                                  (310,325.3)        
+floodInsureType0309                                412,496.4         
+                                                  (283,689.2)        
                                                                      
-floodInsureType0311                               -149,804.3         
-                                                  (225,229.3)        
+floodInsureType0311                               -184,169.7         
+                                                  (211,779.5)        
                                                                      
-floodInsureType0312                                -22,388.4         
-                                                  (255,488.3)        
+floodInsureType0312                                -53,430.1         
+                                                  (238,510.8)        
                                                                      
-floodInsureType0313                               -174,011.4         
-                                                  (216,270.0)        
+floodInsureType0313                               -140,751.3         
+                                                  (201,927.4)        
                                                                      
-floodInsureType0314                                -84,013.1         
-                                                  (245,703.3)        
+floodInsureType0314                                -26,462.9         
+                                                  (228,146.8)        
                                                                      
-floodInsureType0316                             1,799,348.0***       
-                                                  (362,454.6)        
+floodInsureType0316                             1,856,536.0***       
+                                                  (333,965.4)        
                                                                      
-floodInsureType0317                                295,249.0         
-                                                  (323,463.4)        
+floodInsureType0317                               660,267.0**        
+                                                  (291,168.7)        
                                                                      
-floodInsureType0318                             1,632,821.0***       
-                                                  (547,231.6)        
+floodInsureType0318                             1,712,042.0***       
+                                                  (519,810.8)        
                                                                      
-floodInsureType0319                             13,171,158.0***      
-                                                  (991,650.8)        
+floodInsureType0319                             12,887,106.0***      
+                                                  (946,700.8)        
                                                                      
-floodInsureType0476                                -23,039.4         
-                                                  (205,079.2)        
+floodInsureType0476                                26,100.3          
+                                                  (188,553.4)        
                                                                      
-floodInsureType0477                               -566,799.0*        
-                                                  (307,115.7)        
+floodInsureType0477                               -559,295.0*        
+                                                  (289,679.7)        
                                                                      
-floodInsureTypeother                               28,152.6          
-                                                  (184,120.9)        
+floodInsureTypeother                               35,340.4          
+                                                  (169,376.6)        
                                                                      
-Constant                                         -896,284.4***       
-                                                  (308,653.9)        
+Constant                                         -957,120.2***       
+                                                  (286,719.5)        
                                                                      
 ---------------------------------------------------------------------
-Observations                                         1,621           
+Observations                                         1,651           
 R2                                                    0.9            
 Adjusted R2                                           0.9            
-Residual Std. Error                          835,639.6 (df = 1556)   
-F Statistic                                151.7*** (df = 64; 1556)  
+Residual Std. Error                          800,456.2 (df = 1586)   
+F Statistic                                183.1*** (df = 64; 1586)  
 =====================================================================
 Note:                                     *p<0.1; **p<0.05; ***p<0.01
